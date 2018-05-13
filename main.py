@@ -16,7 +16,7 @@ def create_db():
 def run_program():
 	while True :
 		print("Choose what to do:")
-		command = input("(a: Add todo, l: List todo, m: Modify todo, q: Quit)? ")
+		command = input("(a: Add todo, l: List todo, m: Modify todo, c: Check, q: Quit)? ")
 		print()
 		if command == 'a' :
 			add_todo()
@@ -24,6 +24,8 @@ def run_program():
 			list_todo()
 		elif command == 'm' :
 			modify_todo()
+		elif command == 'c' :
+                        check_todo()
 		elif command == 'q' :
 			break
 		else :
@@ -80,7 +82,23 @@ def modify_todo():
 
     print()
     conn.close()
-    
+
+def check_todo():
+    list_todo()
+    print()
+
+    conn = sqlite3.connect("lab.db")
+    cur = conn.cursor()
+
+    record_id = input("Record_id? ")
+
+    sql = "UPDATE todo SET finished = " + '1' + " WHERE id = " + record_id
+    cur.execute(sql)
+    conn.commit()
+    print("Success Change")
+
+    print()
+    conn.close()
 
 if __name__ == "__main__":
     create_db()
