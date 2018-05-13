@@ -4,7 +4,7 @@ conn = sqlite3.connect("lab.db")
 cur = conn.cursor()
 
 def create_db():
-    globals conn, cur
+    global conn, cur
 
     table_create_sql = """create table if not exists todo (
             id integer primary key autoincrement,
@@ -34,7 +34,7 @@ def run_program():
 			print()
 
 def list_todo():
-    globals conn, cur
+    global conn, cur
 
     print("Choose what do view:")
     column = input("(w: What, d: Due, f: Finished, a: All)?")
@@ -56,7 +56,7 @@ def list_todo():
 
 
 def add_todo():
-    globals conn, cur
+    global conn, cur
 
     todo = input("Todo? ")
     due = input("Due date? ")
