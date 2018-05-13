@@ -1,8 +1,10 @@
 import sqlite3
 
+conn = sqlite3.connect("lab.db")
+cur = conn.cursor()
+
 def create_db():
-    conn = sqlite3.connect("lab.db")
-    cur = conn.cursor()
+    global conn, cur
 
     table_create_sql = """create table if not exists todo (
             id integer primary key autoincrement,
@@ -11,7 +13,6 @@ def create_db():
             finished integer not null);"""
 
     cur.execute(table_create_sql)
-    conn.close()
 
 def run_program():
     while True :
@@ -27,20 +28,33 @@ def run_program():
         elif command == 'm' :
             modify_todo()
         elif command == 'c' :
-                        check_todo()
+            check_todo()
         elif command == 'q' :
+            conn.close()
             break
         else :
             print("input error")
             print()
 
 def list_todo():
-    conn = sqlite3.connect("lab.db")
-    cur = conn.cursor()
+    global conn, cur
+
+    print("Choose what do view:")
+    column = input("w: What, d: Due, f: Finished, a: All)? ")
+    print()
+
+    if column == 'w' :
+        column = "what"
+    elif column == 'd' :
+        column = "due"
+    elif column == 'f':
+        column = "finished"
+    elif column == 'a':
+        column = "what, due, finished"
 
     size = 0
 
-    sql = "select * from todo where 1"
+    sql = "select " + "id," + column + " from todo where 1"
     cur.execute(sql)
 
     rows = cur.fetchall()
@@ -53,13 +67,10 @@ def list_todo():
                 print(row[i])
         size = size + 1
 
-    conn.close()
-
     return size
 
 def add_todo():
-    conn = sqlite3.connect("lab.db")
-    cur = conn.cursor()
+    global conn, cur
 
     todo = input("Todo? ")
     due = input("Due date? ")
@@ -69,7 +80,6 @@ def add_todo():
     conn.commit()
 
     print()
-    conn.close()
 
 def modify_todo():
     list_todo()
@@ -114,7 +124,6 @@ def modify_todo():
     conn.commit()
 
     print()
-    conn.close()
 
 def check_todo():
     size = list_todo()
@@ -122,7 +131,7 @@ def check_todo():
 
     conn = sqlite3.connect("lab.db")
     cur = conn.cursor()
-
+    
     sql = "select * from todo where 1"
     cur.execute(sql)
     
@@ -149,7 +158,6 @@ def check_todo():
     print("Success Change")
 
     print()
-    conn.close()
 
 if __name__ == "__main__":
     create_db()
