@@ -22,7 +22,9 @@ def run_program():
         if command == 'a' :
             add_todo()
         elif command == 'l' :
-            list_todo()
+            size = list_todo()
+            print("number of data : " + str(size))
+            print()
         elif command == 'm' :
             modify_todo()
         elif command == 'c' :
@@ -31,6 +33,7 @@ def run_program():
             conn.close()
             break
         else :
+            print("input error")
             print()
 
 def list_todo():
@@ -49,6 +52,8 @@ def list_todo():
     elif column == 'a':
         column = "what, due, finished"
 
+    size = 0
+
     sql = "select " + "id," + column + " from todo where 1"
     cur.execute(sql)
 
@@ -60,8 +65,9 @@ def list_todo():
                 print(row[i], end = " ")
             else :
                 print(row[i])
-    print()
+        size = size + 1
 
+    return size
 
 def add_todo():
     global conn, cur
@@ -74,35 +80,77 @@ def add_todo():
     conn.commit()
 
     print()
-    conn.close()
 
 def modify_todo():
     list_todo()
-
     print()
+
     conn = sqlite3.connect("lab.db")
     cur = conn.cursor()
 
-    record_id = input("Record_id? ")
+    sql = "select * from todo where 1"
+    cur.execute(sql)
+    
+    rows = cur.fetchall()
+    check = False
+
+    while True:
+        record_id = input("Record_id? ")
+        for row in rows:
+            if eval(record_id) == row[0]:
+                check = True
+                break
+            else:
+                check = False
+        if check == True:
+            break
+        else:
+            print("Input Error")
+            print()
+
     todo = input("Todo? ")
     due = input("Due date? ")
-    finished = input("Finished (1: yes, 0: no)? ")
+
+    while True:
+        finished = input("Finished (1: yes, 0: no)? ")
+        if eval(finished) == 0 or eval(finished) == 1:
+            break
+        else:
+            print("Input Error: you should input only 0 or 1")
+            print()
 
     sql = "UPDATE todo SET what = '"+todo+"', due = '"+due+"', finished = "+finished+" WHERE id = "+record_id
     cur.execute(sql)
     conn.commit()
 
     print()
-    conn.close()
 
 def check_todo():
-    list_todo()
+    size = list_todo()
     print()
 
     conn = sqlite3.connect("lab.db")
     cur = conn.cursor()
+    
+    sql = "select * from todo where 1"
+    cur.execute(sql)
+    
+    rows = cur.fetchall()
+    check = False
 
-    record_id = input("Record_id? ")
+    while True:
+        record_id = input("Record_id? ")
+        for row in rows:
+            if eval(record_id) == row[0]:
+                check = True
+                break
+            else:
+                check = False
+        if check == True:
+            break
+        else:
+            print("Input Error")
+            print()
 
     sql = "UPDATE todo SET finished = " + '1' + " WHERE id = " + record_id
     cur.execute(sql)
@@ -110,7 +158,6 @@ def check_todo():
     print("Success Change")
 
     print()
-    conn.close()
 
 if __name__ == "__main__":
     create_db()
