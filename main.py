@@ -72,20 +72,32 @@ def add_todo():
     conn.close()
 
 def modify_todo():
-    size = list_todo()
+    list_todo()
     print()
 
     conn = sqlite3.connect("lab.db")
     cur = conn.cursor()
 
+    sql = "select * from todo where 1"
+    cur.execute(sql)
+    
+    rows = cur.fetchall()
+    check = False
+
     while True:
         record_id = input("Record_id? ")
-        if eval(record_id) >= 1 and eval(record_id) <= size:
+        for row in rows:
+            if eval(record_id) == row[0]:
+                check = True
+                break
+            else:
+                check = False
+        if check == True:
             break
         else:
             print("Input Error")
             print()
-            
+
     todo = input("Todo? ")
     due = input("Due date? ")
 
@@ -111,9 +123,21 @@ def check_todo():
     conn = sqlite3.connect("lab.db")
     cur = conn.cursor()
 
+    sql = "select * from todo where 1"
+    cur.execute(sql)
+    
+    rows = cur.fetchall()
+    check = False
+
     while True:
         record_id = input("Record_id? ")
-        if eval(record_id) >= 1 and eval(record_id) <= size:
+        for row in rows:
+            if eval(record_id) == row[0]:
+                check = True
+                break
+            else:
+                check = False
+        if check == True:
             break
         else:
             print("Input Error")
