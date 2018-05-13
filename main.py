@@ -82,16 +82,20 @@ def add_todo():
     print()
 
 def modify_todo():
-    list_todo()
-    print()
-
-    conn = sqlite3.connect("lab.db")
-    cur = conn.cursor()
-
+    global conn, cur
+    
     sql = "select * from todo where 1"
     cur.execute(sql)
     
     rows = cur.fetchall()
+    for row in rows :
+        for i in range(0,len(row)) :
+            if i != len(row) - 1 :
+                print(row[i], end = " ")
+            else :
+                print(row[i])
+    print()
+                
     check = False
 
     while True:
@@ -126,16 +130,20 @@ def modify_todo():
     print()
 
 def check_todo():
-    size = list_todo()
-    print()
-
-    conn = sqlite3.connect("lab.db")
-    cur = conn.cursor()
+    global conn, cur
     
     sql = "select * from todo where 1"
     cur.execute(sql)
     
     rows = cur.fetchall()
+    for row in rows :
+        for i in range(0,len(row)) :
+            if i != len(row) - 1 :
+                print(row[i], end = " ")
+            else :
+                print(row[i])
+    print()
+    
     check = False
 
     while True:
