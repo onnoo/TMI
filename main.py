@@ -13,34 +13,43 @@ def create_db():
             finished integer not null);"""
 
     cur.execute(table_create_sql)
-    conn.close()
 
 def run_program():
-	while True :
-		print("Choose what to do:")
-		command = input("(a: Add todo, l: List todo, m: Modify todo, c: Check, q: Quit)? ")
-		print()
-		if command == 'a' :
-			add_todo()
-		elif command == 'l' :
-			list_todo()
-		elif command == 'm' :
-			modify_todo()
-		elif command == 'c' :
-                        check_todo()
-		elif command == 'q' :
-			break
-		else :
-			print()
+    while True :
+        print("Choose what to do:")
+        command = input("(a: Add todo, l: List todo, m: Modify todo, c: Check, q: Quit)? ")
+        print()
+        if command == 'a' :
+            add_todo()
+        elif command == 'l' :
+            list_todo()
+        elif command == 'm' :
+            modify_todo()
+        elif command == 'c' :
+            check_todo()
+        elif command == 'q' :
+            conn.close()
+            break
+        else :
+            print()
 
 def list_todo():
     global conn, cur
 
     print("Choose what do view:")
-    column = input("(w: What, d: Due, f: Finished, a: All)?")
+    column = input("w: What, d: Due, f: Finished, a: All)? ")
     print()
 
-    sql = "select" + column + "from todo where 1"
+    if column == 'w' :
+        column = "what"
+    elif column == 'd' :
+        column = "due"
+    elif column == 'f':
+        column = "finished"
+    elif column == 'a':
+        column = "what, due, finished"
+
+    sql = "select " + "id," + column + " from todo where 1"
     cur.execute(sql)
 
     rows = cur.fetchall()
@@ -51,8 +60,7 @@ def list_todo():
                 print(row[i], end = " ")
             else :
                 print(row[i])
-
-    conn.close()
+    print()
 
 
 def add_todo():
