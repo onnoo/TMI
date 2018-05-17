@@ -74,13 +74,23 @@ def list_todo():
 def add_todo():
     global conn, cur
 
-    todo = input("Todo? ")
-    due = input("Due date? ")
+    cnt = input("How many data do you want to add?")
 
-    sql = "insert into todo (what, due, finished) values ('" + todo + "', '" + due + "', '0')"
-    cur.execute(sql)
-    conn.commit()
+    for i in range(0,int(cnt)) :
+        todo = input("Todo? ")
+        due = input("Due date? ")
 
+        if(todo == "exit" and due == "exit") :
+            i = i - 1
+            break
+
+        sql = "insert into todo (what, due, finished) values ('" + todo + "', '" + due + "', '0')"
+        cur.execute(sql)
+        conn.commit()
+        print()
+
+    print()
+    print(str(i+1) + "/" + cnt + " data(s) completely added.")
     print()
 
 def modify_todo():
