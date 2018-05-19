@@ -74,7 +74,10 @@ def list_todo():
 def add_todo():
     global conn, cur
 
-    cnt = input("How many data do you want to add?")
+    cnt = input("How many data do you want to add? (0 to return main menu) ")
+    if(int(cnt) == 0) :
+        print()
+        return
 
     for i in range(0,int(cnt)) :
         todo = input("Todo? ")
@@ -111,7 +114,10 @@ def modify_todo():
     check = False
 
     while True:
-        record_id = input("Record_id? ")
+        record_id = input("Record_id? (0 to return main menu) ")
+        if(int(record_id) == 0) :
+            print()
+            return
         for row in rows:
             if eval(record_id) == row[0]:
                 check = True
@@ -159,7 +165,10 @@ def check_todo():
     check = False
 
     while True:
-        record_id = input("Record_id? ")
+        record_id = input("Record_id? (0 to return main menu) ")
+        if(int(record_id) == 0) :
+            print()
+            return
         for row in rows:
             if eval(record_id) == row[0]:
                 check = True
@@ -182,7 +191,7 @@ def check_todo():
 def search_todo():
     global conn, cur
 
-    search_column = input("(1. ID, 2. What, 3. Due, 4. Finished): ")
+    search_column = input("(1. ID, 2. What, 3. Due, 4. Finished, 0. Return to main menu): ")
     search_column = int(search_column)
 
     if search_column == 1:
@@ -198,6 +207,10 @@ def search_todo():
     elif search_column == 4:
         search_word = input("Finished : ")
         search_word = int(search_word)
+
+    elif search_column == 0:
+        print()
+        return
 
     sql = "select * from todo where 1"
     cur.execute(sql)
