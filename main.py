@@ -17,7 +17,7 @@ def create_db():
 def run_program():
     while True :
         print("Choose what to do:")
-        command = input("(a: Add todo, l: List todo, m: Modify todo, c: Check, q: Quit)? ")
+        command = input("(a: Add todo, l: List todo, m: Modify todo, c: Check, s: Search, q: Quit)? ")
         print()
         if command == 'a' :
             add_todo()
@@ -29,6 +29,8 @@ def run_program():
             modify_todo()
         elif command == 'c' :
             check_todo()
+        elif command == 's' :
+            search_todo()
         elif command == 'q' :
             conn.close()
             break
@@ -72,13 +74,26 @@ def list_todo():
 def add_todo():
     global conn, cur
 
-    todo = input("Todo? ")
-    due = input("Due date? ")
+    cnt = input("How many data do you want to add? (0 to return main menu) ")
+    if(int(cnt) == 0) :
+        print()
+        return
 
-    sql = "insert into todo (what, due, finished) values ('" + todo + "', '" + due + "', '0')"
-    cur.execute(sql)
-    conn.commit()
+    for i in range(0,int(cnt)) :
+        todo = input("Todo? ")
+        due = input("Due date? ")
 
+        if(todo == "exit" and due == "exit") :
+            i = i - 1
+            break
+
+        sql = "insert into todo (what, due, finished) values ('" + todo + "', '" + due + "', '0')"
+        cur.execute(sql)
+        conn.commit()
+        print()
+
+    print()
+    print(str(i+1) + "/" + cnt + " data(s) completely added.")
     print()
 
 def modify_todo():
@@ -99,7 +114,10 @@ def modify_todo():
     check = False
 
     while True:
-        record_id = input("Record_id? ")
+        record_id = input("Record_id? (0 to return main menu) ")
+        if(int(record_id) == 0) :
+            print()
+            return
         for row in rows:
             if eval(record_id) == row[0]:
                 check = True
@@ -147,7 +165,10 @@ def check_todo():
     check = False
 
     while True:
-        record_id = input("Record_id? ")
+        record_id = input("Record_id? (0 to return main menu) ")
+        if(int(record_id) == 0) :
+            print()
+            return
         for row in rows:
             if eval(record_id) == row[0]:
                 check = True
@@ -165,6 +186,45 @@ def check_todo():
     conn.commit()
     print("Success Change")
 
+    print()
+
+def search_todo():
+    global conn, cur
+
+    search_column = input("(1. ID, 2. What, 3. Due, 4. Finished, 0. Return to main menu): ")
+    search_column = int(search_column)
+
+    if search_column == 1:
+        search_word = input("ID : ")
+        search_word = int(search_word)
+
+    elif search_column == 2:
+        search_word = input("What : ")
+
+    elif search_column == 3:
+        search_word = input("Due : ")
+
+    elif search_column == 4:
+        search_word = input("Finished : ")
+        search_word = int(search_word)
+
+    elif search_column == 0:
+        print()
+        return
+
+    sql = "select * from todo where 1"
+    cur.execute(sql)
+
+    rows = cur.fetchall()
+
+    print()
+    for row in rows:
+        if search_word == row[search_column-1]:
+            for i in range(0,len(row)) :
+                if i != len(row) - 1 :
+                    print(row[i], end = " ")
+                else :
+                    print(row[i])
     print()
 
 if __name__ == "__main__":
