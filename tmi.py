@@ -7,14 +7,67 @@ VERSION = "1.0.000"
 AUTHOR = "NoStress team (2018 HU-OSS B-6)"
 
 def create_db(cur):
-	table_create_sql = """create table if not exists todolist (
+	table_create_sql = """CREATE TABLE if not exists Tasks (
 			id integer primary key autoincrement,
-			todo text not null,
+			task text not null,
 			due text not null,
 			note text not null,
 			finished integer not null);"""
 
 	cur.execute(table_create_sql)
+
+	table_create_sql = """CREATE TABLE if not exists TestDir1 (
+			id integer primary key autoincrement,
+			task text not null,
+			due text not null,
+			note text not null,
+			finished integer not null);"""
+
+	cur.execute(table_create_sql)
+
+	table_create_sql = """CREATE TABLE if not exists TestDir2 (
+			id integer primary key autoincrement,
+			task text not null,
+			due text not null,
+			note text not null,
+			finished integer not null);"""
+
+	cur.execute(table_create_sql)
+
+def getstr(stdscr, y, x, msg, colon = True, backspace_end = True):
+	# curses.echo()
+	string = msg
+	cursor_x = x + len(msg)
+	cursor_y = y
+	cmd = 0
+	while(True):
+		stdscr.refresh()
+		if(cmd == 8 or cmd == 127) :
+			if len(string) > 1 :
+				string = string[:-1]
+				stdscr.addch(cursor_y, cursor_x-1, " ")
+				cursor_x = cursor_x - 1
+			else :
+				if backspace_end:
+					return ""
+				elif len(string) == 1:
+					string = ""
+					stdscr.addch(cursor_y, cursor_x-1, " ")
+					cursor_x = cursor_x - 1
+		elif(cmd == 10) :
+			if(colon):
+				return string[1:]
+			else:
+				return string
+		elif 32 <= cmd <= 126 :
+			if cmd != 0 :
+				string = string + chr(cmd)
+				cursor_x = cursor_x + 1
+
+		stdscr.addstr(y, x, string)
+		stdscr.move(cursor_y, cursor_x)
+
+		cmd = stdscr.getch()
 
 def draw_menu(stdscr):
 	# Initialization
@@ -26,6 +79,7 @@ def draw_menu(stdscr):
 
 	# database
 	conn = sqlite3.connect("lab.db")
+	conn.row_factory = sqlite3.Row
 	cur = conn.cursor()
 	create_db(cur)
 
@@ -39,11 +93,11 @@ def draw_menu(stdscr):
 	curses.initscr()
 	curses.use_default_colors()
 	curses.init_pair(1, 231, 197)
-	curses.init_pair(2, 39, -1)
+	curses.init_pair(2, -1, 246) # cursur shadow
 	curses.init_pair(3, -1, 252)
 	# stdscr.bkgd(' ')
 
-	# Loop
+	# Main Loop
 	while (True):
 		height, width = stdscr.getmaxyx()
 
@@ -52,36 +106,17 @@ def draw_menu(stdscr):
 			command = ""
 			cursor_y = height-1
 			cursor_x = 1
-			stdscr.addch(height-1, 0, ':')
-			curses.echo()
-			command = stdscr.getstr(height-1, 1, 15).decode("utf-8")
-			curses.noecho()
+			# stdscr.addch(height-1, 0, ':')
+			# curses.echo()
+			# command = stdscr.getstr(height-1, 1, 15).decode("utf-8")
+			command = getstr(stdscr, height-1, 0, ":")
+			# curses.noecho()
 			cursor_y = height-1
 			cursor_x = 0
 			stdscr.move(cursor_y, cursor_x)
 			# excute command
 			if command == 'q':	# Quit
 				break
-			if command == 'a':	# Add todo
-				# Rendering text
-				stdscr.clear()
-				stdscr.refresh()
-				stdscr.addstr(0, 0, "Todo : ")
-				stdscr.addstr(1, 0, "Due  : ")
-				stdscr.addstr(2, 0, "Note : ")
-
-				# User input
-				curses.echo()
-				todo = stdscr.getstr(0, 7, 15).decode("utf-8")
-				due = stdscr.getstr(1, 7, 15).decode("utf-8")
-				note = stdscr.getstr(2, 7, 15).decode("utf-8")
-				curses.noecho()
-
-				# Excute sql
-				cur.execute('insert into todolist (todo, due, note, finished) values (?,?,?,?)', (todo, due, note, 0))
-				conn.commit()
-
-				aa = stdscr.getch()
 
 			if len(command) > 2 and command[:2] == 'c ' and command[2:].isdigit() : # Check todo
 				cur.execute('DELETE FROM todolist WHERE id=?', (command[2:],))
@@ -92,17 +127,172 @@ def draw_menu(stdscr):
 				stdscr.refresh()
 				# editwin = curses.newwin(5,30, 2,1)
 				# stdscr.attron(curses.color_pair(2))
-				rectangle(stdscr, 0, 0, height-2, width-1)
-				rectangle(stdscr, 0, 0, height-2, 20)
-				rectangle(stdscr, 0, 21, 15, width-1)
-				rectangle(stdscr, 16, 21, height-2, width-1)
-				stdscr.addstr(0,2,"Directory")
-				stdscr.addstr(0,23,"Tasks")
-				stdscr.addstr(16,23,"Memo")
-				# stdscr.attroff(curses.color_pair(2))
-				stdscr.refresh()
-				stdscr.getch(3,3)
+				cmd = 0
+				cursor_y = 1
+				cursor_x = 1
+				cursur_pos = 1;
+				task_pos = 1;
+				list_state = 0;
+				while(True):
+					curses.curs_set(0)
 
+					# Load SQL and Initialize
+					sql = "SELECT name FROM sqlite_master WHERE type='table';"
+					cur.execute(sql)
+					tables = cur.fetchall()
+					dir_len = len(tables) - 1
+					task_len = len(rows)
+
+					# key input
+					if cmd == ord('q') or cmd == curses.KEY_LEFT:
+						if list_state != 0 :
+							list_state = 0
+							cursor_y = cursur_pos
+							cursor_x = 1
+					elif cmd == curses.KEY_DOWN:
+						if list_state != 1 and cursor_y < dir_len:
+							cursur_pos = cursur_pos + 1
+							cursor_y = cursor_y + 1
+						elif list_state == 1 and cursor_y < task_len:
+							task_pos = task_pos + 1
+							cursor_y = cursor_y + 1
+					elif cmd == curses.KEY_UP:
+						if list_state != 1 and cursor_y > 1:
+							cursur_pos = cursur_pos - 1
+							cursor_y = cursor_y - 1
+						elif list_state == 1 and cursor_y > 1:
+							task_pos = task_pos - 1
+							cursor_y = cursor_y - 1
+					elif cmd == 10 or cmd == curses.KEY_RIGHT:
+						if list_state != 1 :
+							list_state = 1
+							task_pos = 1
+							cursor_x = 22
+							cursor_y = 1
+					elif cmd == 27:
+						if list_state != 0 :
+							list_state = 0
+							cursor_y = cursur_pos
+							cursor_x = 1
+					elif cmd == ord(':'):
+						curses.curs_set(1)
+						command = ""
+						# cursor_y = height-1
+						# cursor_x = 1
+						command = getstr(stdscr, height-1, 0, ":")
+
+						# cursor_y = height-1
+						# cursor_x = 0
+						# stdscr.move(cursor_y, cursor_x)
+						curses.curs_set(0)
+
+						if command == 'q':
+							break
+						elif command == 'add':
+							#reload tasks
+							row_count = 1
+							for row in rows :
+								s = ""
+								s = s + str("~ ") + str(row[1]) + " "*(43 - len(row[1]))
+								s = s + row[2]
+								s = s + " "*(10-len(row[2]) + 2)
+								stdscr.addstr(row_count, 22, s)
+								row_count = row_count + 1
+							for i in range(5):
+								stdscr.addstr(17+i, 22, " "*(width-2-22))
+
+							curses.curs_set(1)
+							stdscr.addstr(1+task_len, 22, "+ ")
+							what = getstr(stdscr, 1+task_len, 24, "", False, False)
+							stdscr.addstr(1+task_len, 22, "~ "+what)
+							due = getstr(stdscr, 1+task_len, 67, "", False, False)
+							stdscr.addstr(1+task_len, 67, due)
+							memo = getstr(stdscr, 18, 22, "", False, False)
+
+							tables.pop(1)
+							cur.execute('INSERT INTO '+tables[cursur_pos-1][0]+' (task, due, note, finished) VALUES (?,?,?,?)', (what, due, memo, 0))
+							conn.commit()
+							curses.curs_set(0)
+
+						elif command == 'history':
+							pass
+						elif command == 'move':
+							pass
+						elif command == 'check':
+							pass
+						elif command == 'mod':
+							pass
+
+
+					# list_state = 0 : directory
+					# list_state = 1 : tasks
+
+					stdscr.clear()
+
+					# Load SQL and Initialize
+					sql = "SELECT name FROM sqlite_master WHERE type='table';"
+					cur.execute(sql)
+					tables = cur.fetchall()
+					task_len = len(rows)
+
+					# Draw Box
+					rectangle(stdscr, 0, 0, height-2, width-1)
+					rectangle(stdscr, 0, 0, height-2, 20)
+					rectangle(stdscr, 0, 21, 15, width-1)
+					rectangle(stdscr, 16, 21, height-2, width-1)
+					stdscr.addstr(0,2,"Directory")
+					stdscr.addstr(0,23,"Tasks")
+					stdscr.addstr(16,23,"Memo")
+
+					# print directory
+					dir_index = 1
+					for name in tables:
+						if name[0] != 'sqlite_sequence' :
+							if (cursur_pos == dir_index):
+								stdscr.attron(curses.color_pair(2))
+								stdscr.addstr(dir_index, 1, name[0])
+								stdscr.addstr(cursur_pos, 1 + len(name[0]), " "*(19-len(name[0])))
+								stdscr.attroff(curses.color_pair(2))
+							else :
+								stdscr.addstr(dir_index, 1, name[0])
+							dir_index = dir_index + 1
+
+					# print tasks
+					tables.pop(1)
+					sql = "select id, task, due, note ,finished from "+tables[cursur_pos-1][0]+" where 1"
+					cur.execute(sql)
+
+					rows = cur.fetchall()
+
+					row_count = 1
+					for row in rows :
+						
+						s = ""
+						s = s + str("~ ")
+						s = s + str(row[1])
+						s = s + " "*(43 - len(row[1]))
+						s = s + row[2]
+						s = s + " "*(10-len(row[2]) + 2)
+						if (list_state == 1 and task_pos == row_count) :
+							stdscr.attron(curses.color_pair(2))
+							stdscr.addstr(row_count, 22, s)
+							stdscr.attroff(curses.color_pair(2))
+							# print memo
+							stdscr.addstr(18, 22, row[3])
+						else :
+							stdscr.addstr(row_count, 22, s)
+
+						row_count = row_count + 1
+
+					stdscr.move(cursor_y, cursor_x)
+					stdscr.refresh()
+					cmd = stdscr.getch()
+
+
+				# end loop
+				cursor_y = height-1
+				cursor_x = 0
+				curses.curs_set(1)
 
 			stdscr.clear()
 
@@ -147,14 +337,14 @@ def draw_menu(stdscr):
 		stdscr.addstr(round(height/2 + 3), round(width/2 - len(title_command3)/2), title_command3)
 
 		# Rendering box
-		editwin = curses.newwin(5,30, 2,1)
+		# editwin = curses.newwin(5,30, 2,1)
 		# rectangle(stdscr, 2, 2, 4, 25)
 		# stdscr.refresh()
 		# box = Textbox(editwin)
 		# box.edit()
 
 		# Rendering table
-		sql = "select id, todo, due, note ,finished from todolist where 1"
+		sql = "select id, task, due, note ,finished from Tasks where 1"
 		cur.execute(sql)
 
 		rows = cur.fetchall()
