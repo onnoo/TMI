@@ -6,26 +6,8 @@ import sqlite3
 VERSION = "1.0.000"
 AUTHOR = "NoStress team (2018 HU-OSS B-6)"
 
-def create_db(cur):
-	table_create_sql = """CREATE TABLE if not exists Tasks (
-			id integer primary key autoincrement,
-			task text not null,
-			due text not null,
-			note text not null,
-			finished integer not null);"""
-
-	cur.execute(table_create_sql)
-
-	table_create_sql = """CREATE TABLE if not exists TestDir1 (
-			id integer primary key autoincrement,
-			task text not null,
-			due text not null,
-			note text not null,
-			finished integer not null);"""
-
-	cur.execute(table_create_sql)
-
-	table_create_sql = """CREATE TABLE if not exists TestDir2 (
+def create_db(cur, dir_name):
+	table_create_sql = "CREATE TABLE if not exists " + dir_name +""" (
 			id integer primary key autoincrement,
 			task text not null,
 			due text not null,
@@ -128,7 +110,6 @@ def draw_menu(stdscr):
 	conn = sqlite3.connect("lab.db")
 	conn.row_factory = sqlite3.Row
 	cur = conn.cursor()
-	create_db(cur)
 
 	# set up window
 	stdscr = curses.initscr()
@@ -177,9 +158,11 @@ def draw_menu(stdscr):
 				cmd = 0
 				cursor_y = 1
 				cursor_x = 1
-				cursur_pos = 1;
-				task_pos = 1;
-				list_state = 0;
+
+				cursur_pos = 1
+				task_pos = 1
+				list_state = 0
+
 				while(True):
 					curses.curs_set(0)
 
@@ -266,6 +249,13 @@ def draw_menu(stdscr):
 							if (target in task_list):
 								sql = "UPDATE "+tables[cursur_pos-1][0]+" SET finished = 1 WHERE task = " + target
 								conn.commit()
+
+						elif command == 'add -d':
+							curses.curs_set(1)
+							dir_name = getstr(stdscr, 1+dir_len, 1, "", False, False)
+							stdscr.addstr(1+dir_len, 19, dir_name)
+							create_db(cur, dir_name)
+
 						elif command == 'history':
 							pass
 						elif command == 'move':
@@ -298,7 +288,9 @@ def draw_menu(stdscr):
 					dir_index = 1
 					for name in tables:
 						if name[0] != 'sqlite_sequence' :
-							if (cursur_pos == dir_index):
+
+							if (list_state == 0 and cursur_pos == dir_index):
+
 								stdscr.attron(curses.color_pair(2))
 								stdscr.addstr(dir_index, 1, name[0])
 								stdscr.addstr(cursur_pos, 1 + len(name[0]), " "*(19-len(name[0])))
@@ -320,7 +312,10 @@ def draw_menu(stdscr):
 
 					row_count = 1
 					for row in rows :
-						
+
+						if(row[4] == 1):
+							continue
+
 						s = ""
 						s = s + str("~ ")
 						s = s + str(row[1])
