@@ -111,6 +111,7 @@ def draw_menu(stdscr):
 				cmd = 0
 				cursor_y = 1
 				cursor_x = 1
+
 				cursur_pos = 1
 				task_pos = 1
 				list_state = 0
@@ -237,7 +238,9 @@ def draw_menu(stdscr):
 					dir_index = 1
 					for name in tables:
 						if name[0] != 'sqlite_sequence' :
+
 							if (list_state == 0 and cursur_pos == dir_index):
+
 								stdscr.attron(curses.color_pair(2))
 								stdscr.addstr(dir_index, 1, name[0])
 								stdscr.addstr(cursur_pos, 1 + len(name[0]), " "*(19-len(name[0])))
@@ -255,8 +258,10 @@ def draw_menu(stdscr):
 
 					row_count = 1
 					for row in rows :
+
 						if(row[4] == 1):
 							continue
+
 						s = ""
 						s = s + str("~ ")
 						s = s + str(row[1])
