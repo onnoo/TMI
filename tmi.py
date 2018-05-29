@@ -170,8 +170,9 @@ def draw_menu(stdscr):
 					sql = "SELECT name FROM sqlite_master WHERE type='table';"
 					cur.execute(sql)
 					tables = cur.fetchall()
-					dir_len = len(tables) - 1
-					task_len = len(rows)
+					tables.pop(1)
+					dir_len = len(tables)
+					# task_len = len(rows)
 
 					# key input
 					if cmd == ord('q') or cmd == curses.KEY_LEFT:
@@ -244,10 +245,10 @@ def draw_menu(stdscr):
 							conn.commit()
 							curses.curs_set(0)
 
-						elif len(command) >= 6 and command == 'check':
+						elif len(command) >= 6 and command[:5] == 'check':
 							target = command[6:]
 							if (target in task_list):
-								sql = "UPDATE "+tables[cursur_pos-1][0]+" SET finished = 1 WHERE task = " + target
+								cur.execute('UPDATE '+tables[cursur_pos-1][0]+' SET finished = 1 WHERE task = ?', (target,))
 								conn.commit()
 
 						elif command == 'add -d':
@@ -273,7 +274,7 @@ def draw_menu(stdscr):
 					sql = "SELECT name FROM sqlite_master WHERE type='table';"
 					cur.execute(sql)
 					tables = cur.fetchall()
-					task_len = len(rows)
+					task_len = 0
 
 					# Draw Box
 					rectangle(stdscr, 0, 0, height-2, width-1)
@@ -330,7 +331,7 @@ def draw_menu(stdscr):
 							stdscr.addstr(18, 22, row[3])
 						else :
 							stdscr.addstr(row_count, 22, s)
-
+						task_len = task_len + 1
 						row_count = row_count + 1
 
 					stdscr.move(cursor_y, cursor_x)
