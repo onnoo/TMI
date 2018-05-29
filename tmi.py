@@ -16,7 +16,7 @@ def create_db(cur, dir_name):
 
 	cur.execute(table_create_sql)
 
-def getstr(stdscr, y, x, msg, colon = True, backspace_end = True):
+def getstr(stdscr, y, x, msg, colon = True, backspace_end = True, cursur_pos = 1):
 	# curses.echo()
 	string = msg
 	cursor_x = x + len(msg)
@@ -42,9 +42,56 @@ def getstr(stdscr, y, x, msg, colon = True, backspace_end = True):
 			else:
 				return string
 		elif 32 <= cmd <= 126 :
-			if cmd != 0 :
-				string = string + chr(cmd)
-				cursor_x = cursor_x + 1
+			string = string + chr(cmd)
+			cursor_x = cursor_x + 1
+		elif cmd == 9 and len(string) > 7 :
+			if (string[:6] == ':check'):
+				conn = sqlite3.connect("lab.db")
+				conn.row_factory = sqlite3.Row
+				cur = conn.cursor()
+				sql = "SELECT name FROM sqlite_master WHERE type='table';"
+				cur.execute(sql)
+				tables = cur.fetchall()
+				tables.pop(1)
+
+				sql = "select task from "+tables[cursur_pos-1][0]+" where 1"
+				cur.execute(sql)
+				tasks = cur.fetchall()
+
+
+				task_list = []
+				for t in tasks :
+					task_list.append(t[0])
+
+				target = string[7:] # Ne
+				find_names = []
+				for name in task_list :
+					if len(name) >= len(target) and name[:len(target)] == target :
+						find_names.append(name)
+
+				if(len(find_names) == 1):
+					string = string[:-len(target)]
+					string = string + find_names[0]
+					cursor_x = cursor_x - len(target) + len(find_names[0])
+				elif(len(find_names) > 1):
+					pre_result = target
+					result = target
+					ck = 1
+					index = len(target)
+					while(ck):
+						for task in find_names:
+							if(task[:index] != result):
+								ck = 0
+						if(ck != 0):
+							index = index + 1
+							result = find_names[0][:index]
+						else :
+							result = result[:-1]
+							break
+					string = string[:-len(target)]
+					string = string + result
+					cursor_x = cursor_x - len(target) + len(result)
+		# :check D
 
 		stdscr.addstr(y, x, string)
 		stdscr.move(cursor_y, cursor_x)
@@ -162,7 +209,7 @@ def draw_menu(stdscr):
 						command = ""
 						# cursor_y = height-1
 						# cursor_x = 1
-						command = getstr(stdscr, height-1, 0, ":")
+						command = getstr(stdscr, height-1, 0, ":", True, True, cursur_pos)
 
 						# cursor_y = height-1
 						# cursor_x = 0
@@ -197,18 +244,21 @@ def draw_menu(stdscr):
 							conn.commit()
 							curses.curs_set(0)
 
+						elif len(command) >= 6 and command == 'check':
+							target = command[6:]
+							if (target in task_list):
+								sql = "UPDATE "+tables[cursur_pos-1][0]+" SET finished = 1 WHERE task = " + target
+								conn.commit()
+
 						elif command == 'add -d':
 							curses.curs_set(1)
 							dir_name = getstr(stdscr, 1+dir_len, 1, "", False, False)
 							stdscr.addstr(1+dir_len, 19, dir_name)
-
 							create_db(cur, dir_name)
 
 						elif command == 'history':
 							pass
 						elif command == 'move':
-							pass
-						elif command == 'check':
 							pass
 						elif command == 'mod':
 							pass
@@ -255,6 +305,10 @@ def draw_menu(stdscr):
 					cur.execute(sql)
 
 					rows = cur.fetchall()
+
+					task_list = []
+					for t in rows :
+						task_list.append(t[1])
 
 					row_count = 1
 					for row in rows :
