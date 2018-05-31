@@ -22,9 +22,13 @@ def run_program():
         if command == 'a' :
             add_todo()
         elif command == 'l' :
-            size = list_todo()
-            print("number of data : " + str(size))
-            print()
+            list_todo_filter = input("What items are you looking at (a: All, f: Finished only)?")
+            while(list_todo_filter != "a" and list_todo_filter != "f"):
+                list_todo_filter = input("What items are you looking at (a: All, f: Finished only)?")
+            list_todo(filter_todo(list_todo_filter))
+            # size = list_todo()
+            # print("number of data : " + str(size))
+            # print()
         elif command == 'm' :
             modify_todo()
         elif command == 'c' :
@@ -38,38 +42,51 @@ def run_program():
             print("input error")
             print()
 
-def list_todo():
+def filter_todo(filter):
     global conn, cur
 
-    print("Choose what do view:")
-    column = input("w: What, d: Due, f: Finished, a: All)? ")
-    print()
-
-    if column == 'w' :
-        column = "what"
-    elif column == 'd' :
-        column = "due"
-    elif column == 'f':
-        column = "finished"
-    elif column == 'a':
-        column = "what, due, finished"
-
-    size = 0
-
-    sql = "select " + "id," + column + " from todo where 1"
+    if(filter == "f"):
+        sql = "select * from todo where finished = 1"
+    elif(filter == "a"):
+        sql = "select * from todo"
+    
     cur.execute(sql)
+    data = cur.fetchall()
 
-    rows = cur.fetchall()
+    return data
 
-    for row in rows :
+def list_todo(data):
+    # global conn, cur
+
+    # print("Choose what do view:")
+    # column = input("w: What, d: Due, f: Finished, a: All)? ")
+    # print()
+
+    # if column == 'w' :
+    #     column = "what"
+    # elif column == 'd' :
+    #     column = "due"
+    # elif column == 'f':
+    #     column = "finished"
+    # elif column == 'a':
+    #     column = "what, due, finished"
+
+    # size = 0
+
+    # sql = "select " + "id," + column + " from todo where 1"
+    # cur.execute(sql)
+
+    # rows = cur.fetchall()
+
+    for row in data :
         for i in range(0,len(row)) :
             if i != len(row) - 1 :
                 print(row[i], end = " ")
             else :
                 print(row[i])
-        size = size + 1
+    #     size = size + 1
 
-    return size
+    # return size
 
 def add_todo():
     global conn, cur
