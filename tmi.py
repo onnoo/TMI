@@ -166,7 +166,6 @@ class TitleRoom(Room):
 		elif execute == 'help':
 			self.rm.set_room("HelpRoom")
 
-
 	def render(self):
 		self.stdscr.clear()
 		self.stdscr.move(self.cursor_y, self.cursor_x)
@@ -251,6 +250,7 @@ class TableRoom(Room):
 				self.cursor_x = 1
 				self.string_x = 1
 		elif execute == 'add' and self.table_list != []:
+
 			if self.string_check == False:
 				self.string_check = True
 				self.add_task = 1
@@ -526,7 +526,7 @@ class HelpRoom(Room):
 	def get_key(self):
 		if self.rm.ready != 0:
 			self.key = self.stdscr.getch()
-
+      
 def run(stdscr):
 	stdscr = curses.initscr()
 	curses.noecho()
