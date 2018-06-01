@@ -213,6 +213,9 @@ class TableRoom(Room):
         self.modify_task_on = False
         self.gab = 0
         self.target = ""
+        self.wmodify_task = 0
+        self.dmodify_task = 0
+        self.mmodify_task = 0
                 
         self.add_dir = False
         self.add_task = 0
@@ -283,6 +286,60 @@ class TableRoom(Room):
                     self.string_x = 22
                     self.string = "+ "
 
+        elif len(execute) >= 6 and execute[:6] == "mod-w ":
+            if self.modify_check == False:
+                self.target = execute[6:]
+                if self.target in self.db.get_task_name_list(self.current_table):
+                    self.gab = 1
+                    for task in self.task_list:
+                        if task[1] == self.target:
+                            self.due = task[2]
+                            self.memo = task[3]
+                            break
+                        self.gab = self.gab+1
+                    self.modify_check = True
+                    self.modify_task = 1
+                    self.cursor_y = self.gab
+                    self.cursor_x = 24
+                    self.string_x = 22
+                    self.string = "+ "
+                    self.wmodify_task = 1
+
+        elif len(execute) >= 6 and execute[:6] == "mod-d ":
+            if self.modify_check == False:
+                self.target = execute[6:]
+                if self.target in self.db.get_task_name_list(self.current_table):
+                    self.gab = 1
+                    for task in self.task_list:
+                        if task[1] == self.target:
+                            self.what = task[1]
+                            self.memo = task[3]
+                            break
+                        self.gab = self.gab+1
+                    self.modify_check = True
+                    self.modify_task = 1
+                    self.cursor_y = self.gab
+                    self.cursor_x = 24
+                    self.string_x = 22
+                    self.dmodify_task = 1
+
+        elif len(execute) >= 6 and execute[:6] == "mod-m ":
+            if self.modify_check == False:
+                self.target = execute[6:]
+                if self.target in self.db.get_task_name_list(self.current_table):
+                    self.gab = 1
+                    for task in self.task_list:
+                        if task[1] == self.target:
+                            self.what = task[1]
+                            self.due = task[2]
+                            break
+                        self.gab = self.gab + 1
+                    self.modify_check = True
+                    self.modify_task = 1
+                    self.cursor_y = self.gab
+                    self.cursor_x = 24
+                    self.string_x = 22
+                    self.mmodify_task = 1
 
         if self.add_dir:
             self.db.create_table(string)
@@ -290,7 +347,8 @@ class TableRoom(Room):
             self.add_dir = False
 
         if self.add_task == 3 or self.modify_task == 3:
-            self.memo = self.string
+            if self.wmodify_task == 0 and self.dmodify_task == 0:
+                self.memo = self.string
 
         if self.add_task_on == True:
             if self.add_task == 2:
@@ -308,19 +366,25 @@ class TableRoom(Room):
 
         if self.modify_task_on == True:
             if self.modify_task == 2:
-                self.what = string
+                if self.dmodify_task == 0 and self.mmodify_task == 0:
+                    self.what = string
                 self.db.mod_task(self.current_table, self.target, 'what', self.what)
             elif self.modify_task == 3:
-                self.due = string
+                if self.wmodify_task == 0 and self.mmodify_task == 0:
+                    self.due = string
                 self.db.mod_task(self.current_table, self.what, 'due', self.due)
             elif self.modify_task == 0:
-                self.memo = string
+                if self.wmodify_task == 0 and self.dmodify_task == 0:
+                    self.memo = string
                 self.db.mod_task(self.current_table, self.what, 'memo', self.memo)
                 self.what = ""
                 self.due = ""
                 self.memo = ""
                 self.target = ""
                 self.gab = 0
+                self.wmodify_task = 0
+                self.dmodify_task = 0
+                self.mmodify_task = 0
             self.modify_task_on = False
             string = ""
 
@@ -384,7 +448,14 @@ class TableRoom(Room):
 
 
         if self.string_check or self.modify_check:
-            self.stdscr.addstr(self.cursor_y, self.string_x, self.string)
+            if self.mmodify_task == 0:
+                if self.wmodify_task == 0 and self.dmodify_task == 0:
+                    self.stdscr.addstr(self.cursor_y, self.string_x, self.string)
+                elif self.wmodify_task == 1 and self.modify_task == 1:
+                    self.stdscr.addstr(self.cursor_y, self.string_x, self.string)
+                elif self.dmodify_task == 1 and self.modify_task == 2:
+                    self.stdscr.addstr(self.cursor_y, self.string_x, self.string)
+                
         else:
             self.stdscr.addstr(self.cursor_y, 0, self.command)
         if self.add_task > 0 or self.modify_task > 0:
@@ -408,6 +479,7 @@ class TableRoom(Room):
     def get_string(self, y, x):
         self.cursor_x = x
         self.cursor_y = y
+        
         if self.string_check or self.modify_check:
             if self.key == 10:
                 if self.string_check == True and self.add_task == 0:
@@ -507,10 +579,10 @@ class TableRoom(Room):
                 self.command = self.command + chr(self.key)
                 self.cursor_x = self.cursor_x + 1
             elif self.key == 9:
-                if (self.command[:6] == ":check" and len(self.command) > 7) or (self.command[:4] == ":mod" and len(self.command) > 5):
+                if ((self.command[:6] == ":check" or self.command[:6] == ":mod-w" or self.command[:6] == ":mod-d" or self.command[:6] == ":mod-m") and len(self.command) > 7) or (self.command[:4] == ":mod" and len(self.command) > 5):
                     task_list = self.db.get_task_name_list(self.current_table)
                     # self.stdscr.addstr(4,4,task_list[0])
-                    if self.command[:6] == ":check":
+                    if self.command[:6] == ":check" or self.command[:6] == ":mod-w" or self.command[:6] == ":mod-d" or self.command[:6] == ":mod-m":
                         target = self.command[7:]
                     elif self.command[:4] == ":mod":
                         target = self.command[5:]
