@@ -163,7 +163,8 @@ class TitleRoom(Room):
 			self.rm.stop()
 		elif execute == 'ls':
 			self.rm.set_room("TableRoom")
-
+		elif execute == 'help':
+			self.rm.set_room("HelpRoom")
 
 	def render(self):
 		self.stdscr.clear()
@@ -248,7 +249,8 @@ class TableRoom(Room):
 				self.cursor_y = 1+len(self.table_list)
 				self.cursor_x = 1
 				self.string_x = 1
-		elif execute == 'add':
+		elif execute == 'add' and self.table_list != []:
+
 			if self.string_check == False:
 				self.string_check = True
 				self.add_task = 1
@@ -467,6 +469,64 @@ class TableRoom(Room):
 						self.cursor_x = self.cursor_x - len(target) + len(result)
 		return ""
 
+class HelpRoom(Room):
+	def __init__(self, stdscr, roomManager):
+		super(HelpRoom, self).__init__(stdscr, roomManager)
+		self.name = "HelpRoom"
+		self.help = [
+							"User Manuals",
+							"\n",
+							"\n",
+							"Name",
+							"	tmi - task manage interface.",
+							"	",
+							"How to use",
+							"	tmi [:add] add task(due, memo)",
+							"	tmi [:check] update finished to 1",
+							"	",
+							"Explain",
+							"	TMI is a TUI program using curses package. You can save tasks for", 
+							"	each directory and you can write notes on each task.",
+							"	",
+							"Options",
+							"	 [:add -d] add directory",
+							"	",
+							"Author",
+							"     No stress team (2018 HU-OSS B-6)",
+					]
+		self.k = 0
+
+	def logic(self):
+		execute = self.get_command()
+
+		if execute == 'q':
+			self.rm.set_room("DefaultRoom")
+
+	def render(self):
+		self.stdscr.clear()
+
+		line = 0
+		for text in self.help:
+			if line == 0:
+				self.stdscr.attron(curses.A_BOLD)
+				self.stdscr.addstr(line + 2, round(self.width/2 - len(self.help[0])/2), text)
+				line = line + 1
+				continue
+			else:
+				self.stdscr.attroff(curses.A_BOLD)
+			
+			self.stdscr.addstr(line + 3, 0, text)
+
+			line = line + 1
+
+		self.stdscr.addstr(self.cursor_y, 0, self.command)
+
+		self.stdscr.refresh()
+
+	def get_key(self):
+		if self.rm.ready != 0:
+			self.key = self.stdscr.getch()
+      
 def run(stdscr):
 	stdscr = curses.initscr()
 	curses.noecho()
@@ -480,6 +540,7 @@ def run(stdscr):
 	rm = RoomManager()
 	rm.add_room(TitleRoom(stdscr, rm))
 	rm.add_room(TableRoom(stdscr, rm, db))
+	rm.add_room(HelpRoom(stdscr, rm))
 
 	rm.start()
 
