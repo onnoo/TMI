@@ -1,9 +1,0 @@
-README.md
-setup.cfg
-setup.py
-tmi.egg-info/PKG-INFO
-tmi.egg-info/SOURCES.txt
-tmi.egg-info/dependency_links.txt
-tmi.egg-info/entry_points.txt
-tmi.egg-info/not-zip-safe
-tmi.egg-info/top_level.txt
