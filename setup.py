@@ -25,7 +25,7 @@ setup(
         'Programming Language :: Python :: 3.6'
     ],
     entry_points = {
-        'console scripts' : [
+        'console_scripts' : [
             'tmi = tmi',
         ],
     },
