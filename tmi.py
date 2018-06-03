@@ -4,7 +4,7 @@ from curses.textpad import Textbox, rectangle
 import sqlite3
 from pathlib import Path
 
-VERSION = "0.5.599"
+VERSION = "0.5.605"
 AUTHOR = "NoStress team (2018 HU-OSS B-6)"
 
 class DB:
