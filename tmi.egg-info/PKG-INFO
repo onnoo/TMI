@@ -1,0 +1,21 @@
+Metadata-Version: 1.2
+Name: tmi
+Version: 0.5.599
+Summary: NoStress team (2018 HU-OSS B-6)'s Open Source CLI Todo List
+Home-page: https://github.com/onnoo/hu-oss-sw-2018-B-6
+Author: onnoo
+Author-email: sweyjw@gmail.com
+License: UNKNOWN
+Download-URL: https://github.com/onnoo/hu-oss-sw-2018-B-6/archive/master.tar.gz
+Description: UNKNOWN
+Keywords: tmi,todo list,todo cli
+Platform: UNKNOWN
+Classifier: Environment :: Console
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.2
+Classifier: Programming Language :: Python :: 3.3
+Classifier: Programming Language :: Python :: 3.4
+Classifier: Programming Language :: Python :: 3.5
+Classifier: Programming Language :: Python :: 3.6
+Requires-Python: >=3
