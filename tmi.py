@@ -2,13 +2,15 @@ import sys,os
 import curses
 from curses.textpad import Textbox, rectangle
 import sqlite3
+from pathlib import Path
 
-VERSION = "0.5.599"
+VERSION = "0.5.605"
 AUTHOR = "NoStress team (2018 HU-OSS B-6)"
 
 class DB:
 	def __init__(self):
-		self.conn = sqlite3.connect("data.db")
+		home_dir = str(Path.home())
+		self.conn = sqlite3.connect(home_dir + "/data.db")
 		self.cur = self.conn.cursor()
 
 	def create_table(self, table_name):
