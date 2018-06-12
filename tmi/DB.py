@@ -9,11 +9,11 @@ class DB:
 
 	def create_table(self, table_name):
 		sql = ("CREATE TABLE if not exists {0} ("
-				"id integer primary key autoincrement,"
-				"what text not null,"
-				"due text not null,"
-				"memo text not null,"
-				"finished integer not null);").format(table_name)
+			   "id integer primary key autoincrement,"
+			   "what text not null,"
+			   "due text not null,"
+			   "memo text not null,"
+			   "finished integer not null);").format(table_name)
 		self.cur.execute(sql)
 
 	def get_table_list(self):
@@ -24,7 +24,7 @@ class DB:
 			if table[0] == 'sqlite_sequence':
 				continue
 			table_list.append(table[0])
-			return table_list
+		return table_list
 	def get_task_list(self, table_name):
 		sql = ("SELECT * FROM {0} WHERE finished = 0").format(table_name)
 		self.cur.execute(sql)
