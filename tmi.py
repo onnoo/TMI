@@ -56,7 +56,6 @@ class DB:
 		for task in self.cur.fetchall():
 			task_list.append(task[0])
 		return task_list
-		
 
 class RoomManager:
 	def __init__(self):
@@ -213,10 +212,11 @@ class TableRoom(Room):
 		self.dir_cursor = 1
 		self.task_cursor = 1
 		self.table_list = self.db.get_table_list()
-		if len(self.table_list) != 0:
+		if self.table_list != None:
 			self.current_table = self.table_list[self.dir_cursor-1]
 			self.task_list = self.db.get_task_list(self.current_table)
 		else:
+			self.table_list = []
 			self.current_table = 0
 			self.task_list = []
 				
@@ -235,6 +235,10 @@ class TableRoom(Room):
 		self.ERRORHELP = False
 		self.ERRORWORD = False
 		self.colon_check = False
+		self.isdir = False
+#		self.length = 10
+#		self.top = 0
+#		self.bottom = 0
 				
 		self.add_dir = False
 		self.add_task = 0
@@ -274,6 +278,7 @@ class TableRoom(Room):
 			self.rm.set_room("DefaultRoom")
 		elif execute == 'add -d':
 			if self.string_check == False:
+				self.isdir = True
 				self.colon_check = True
 				self.ERRORHELP = False
 				self.string_check = True
@@ -403,6 +408,8 @@ class TableRoom(Room):
 			self.db.create_table(string)
 			string = ""
 			self.add_dir = False
+			self.colon_check = False
+			self.isdir = False
 
 		if self.add_task == 3 or self.modify_task == 3:
 			if self.wmodify_task == 0 and self.dmodify_task == 0:
@@ -449,10 +456,11 @@ class TableRoom(Room):
 			string = ""
 
 		self.table_list = self.db.get_table_list()
-		if len(self.table_list) != 0:
+		if self.table_list != None:
 			self.current_table = self.table_list[self.dir_cursor-1]
 			self.task_list = self.db.get_task_list(self.current_table)
 		else:
+			self.table_list = []
 			self.current_table = 0
 			self.task_list = []
 
@@ -511,6 +519,7 @@ class TableRoom(Room):
 			else:
 				stdscr.addstr(task_pos_y, 22, s)
 			task_pos_y = task_pos_y + 1
+			#bottom = bottom + 1
 
 
 		if self.string_check or self.modify_check:
@@ -614,6 +623,9 @@ class TableRoom(Room):
 
 			elif self.key == 8 or self.key == 127:
 				if len(self.string) > 2:
+					self.cursor_x = self.cursor_x - 1
+					self.string = self.string[:-1]
+				elif len(self.string) > 0 and self.isdir == True:
 					self.cursor_x = self.cursor_x - 1
 					self.string = self.string[:-1]
 			elif 32 <= self.key <= 126:
