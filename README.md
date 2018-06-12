@@ -1,15 +1,41 @@
-# Opensource PBL2 : Opensource console software
+## What is TMI? ##
+TMI(Task Manage Interface) is open source console software for managing user's
+tasks.  It provides some method and text-based user interface.  This software is
+developed for the various Linux OS and by python.
 
-> 리눅스 운영 도구 및 컨설팅을 공급하는 Redhat 사에 속한 우리 팀은, 클라이언트의 요청을 받아 클라이언트 사내에서 사용할 수 있는 콘솔 기반의 어플리케이션을 개발하는 작업을 진행하게 되었다. 이 어플리케이션은 사용자의 TODO 리스트를 리눅스 콘솔 기반으로 사용할 수 있도록 돕는 콘솔용의 어플리케이션이다.
+## Bugs and feature requests ##
+This software may have many bugs or few features. Have a bug or a feature request?
+Please leave your idea as an issue or pull request, but provide as much detail and context as possible.
 
-<br />
+## Installation ##
+> This software recommends you to use PyPI.(In fact, this is only way)
+Supported OS are Linux distributions like Devian, Ubuntu. We plan to don't care any other
+OS yet.  
+- **Install TMI from PyPI (recommended):**
 
-| Member | Role | Github |
-|------------------------|---------|--------|
-| 양재우 | Project Manager | [onnoo](https://github.com/onnoo) |
-| 김재훈 | Programmer | [anmyeondo](https://github.com/anmyeondo) |
-| 안진성 | Programmer | [RDCPP](https://github.com/RDCPP) |
-| 김건기 | Maintenance | [KEON-KIM](https://github.com/KEON-KIM) |
-| 김성찬 | Maintenance | [ksccmp](https://github.com/ksccmp) |
+```sh
+sudo pip install tmi
+```
 
-<br />
+If you are using a virtualenv, you may want to avoid using sudo:
+
+```sh
+pip install tmi
+```
+
+- **Alternatively: install TMI from the GitHub source:**
+
+First, clone TMI using `git`:
+
+```sh
+git clone https://github.com/onnoo/hu-oss-sw-2018-B-6.git
+```
+
+ Then, `cd` to the TMI folder and run the install command:
+```sh
+cd TMI
+sudo python setup.py install
+```
+
+## License ##
+Code released under the [MIT License](https://github.com/onnoo/hu-oss-sw-2018-B-6/raw/master/LICENSE).

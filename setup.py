@@ -15,6 +15,7 @@ setup(
     package_data     =  {'tmi' : [ "LICENSE" ]},
     zip_safe=False,
     classifiers      = [
+
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.2',
