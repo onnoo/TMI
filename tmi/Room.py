@@ -121,7 +121,7 @@ class TableRoom(Room):
 		self.dir_cursor = 1
 		self.task_cursor = 1
 		self.table_list = self.db.get_table_list()
-		if len(self.table_list) != 0:
+		if self.table_list != None and len(self.table_list) != 0:
 			self.current_table = self.table_list[self.dir_cursor-1]
 			self.task_list = self.db.get_task_list(self.current_table)
 		else:
