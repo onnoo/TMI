@@ -23,4 +23,4 @@ install:
   - pip install tmi
 
 script:
-  - tmi
+  - tmi --version
