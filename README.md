@@ -1,5 +1,5 @@
-## What is tmi? ##
-tmi(task manage interface) is open source console software for managing user's
+## What is TMI? ##
+TMI(Task Manage Interface) is open source console software for managing user's
 tasks.  It provides some method and text-based user interface.  This software is
 developed for the various Linux OS and by python.
 
@@ -11,29 +11,29 @@ Please leave your idea as an issue or pull request, but provide as much detail a
 > This software recommends you to use PyPI.(In fact, this is only way)
 Supported OS are Linux distributions like Devian, Ubuntu. We plan to don't care any other
 OS yet.  
-- **Install Keras from PyPI (recommended):**
+- **Install TMI from PyPI (recommended):**
 
 ```sh
-sudo pip install keras
+sudo pip install tmi
 ```
 
 If you are using a virtualenv, you may want to avoid using sudo:
 
 ```sh
-pip install keras
+pip install tmi
 ```
 
-- **Alternatively: install Keras from the GitHub source:**
+- **Alternatively: install TMI from the GitHub source:**
 
-First, clone Keras using `git`:
+First, clone TMI using `git`:
 
 ```sh
-git clone https://github.com/keras-team/keras.git
+git clone https://github.com/onnoo/hu-oss-sw-2018-B-6.git
 ```
 
- Then, `cd` to the Keras folder and run the install command:
+ Then, `cd` to the TMI folder and run the install command:
 ```sh
-cd keras
+cd TMI
 sudo python setup.py install
 ```
 
