@@ -1,6 +1,5 @@
 import curses
 from curses.textpad import Textbox, rectangle
-from db import DB
 
 class Room:
 		
