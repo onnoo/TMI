@@ -38,4 +38,4 @@ sudo python setup.py install
 ```
 
 ## License ##
-Code released under the [MIT License](https://github.com/onnoo/hu-oss-sw-2018-B-6/raw/master/LICENSE).
+Code released under the [MIT License](https://github.com/onnoo/TMI/raw/master/LICENSE).
