@@ -1,7 +1,7 @@
 import sys,os
 import curses
 import click
-from db import DB
+from DB import DB
 from RoomManager import RoomManager
 from Room import TitleRoom, TableRoom, HelpRoom
 
