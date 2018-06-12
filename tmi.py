@@ -112,6 +112,7 @@ class Room:
 
 	def get_command(self):
 		if self.key == ord(':') and not self.command_check:
+			curses.curs_set(1)
 			self.ERROR = False
 			self.command = ":"
 			self.command_check = True
@@ -174,10 +175,12 @@ class TitleRoom(Room):
 			self.ERRORHELP = False
 
 	def render(self):
+
 		self.stdscr.clear()
 		self.stdscr.move(self.cursor_y, self.cursor_x)
 		if self.ERROR == True:
-			self.stdscr.addstr(29, 0, ": Not an editor command ", curses.color_pair(2))
+			curses.curs_set(0)
+			self.stdscr.addstr(self.height-1, 0, ": Not an editor command ", curses.color_pair(2))
 				
 		row_num = 0
 		for text in self.title:
@@ -231,6 +234,7 @@ class TableRoom(Room):
 		self.ERROR = False
 		self.ERRORHELP = False
 		self.ERRORWORD = False
+		self.colon_check = False
 				
 		self.add_dir = False
 		self.add_task = 0
@@ -270,6 +274,7 @@ class TableRoom(Room):
 			self.rm.set_room("DefaultRoom")
 		elif execute == 'add -d':
 			if self.string_check == False:
+				self.colon_check = True
 				self.ERRORHELP = False
 				self.string_check = True
 				self.cursor_y = 1+len(self.table_list)
@@ -277,6 +282,7 @@ class TableRoom(Room):
 				self.string_x = 1
 		elif execute == 'add':
 			if self.string_check == False:
+				self.colon_check = True
 				self.ERRORHELP = False
 				self.string_check = True
 				self.add_task = 1
@@ -303,6 +309,7 @@ class TableRoom(Room):
 						if task[1] == self.target:                                                        
 							break
 						self.gab = self.gab+1
+					self.colon_check = True
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
@@ -326,6 +333,8 @@ class TableRoom(Room):
 							self.memo = task[3]
 							break
 						self.gab = self.gab+1
+					self.colon_check = True
+					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
 					self.cursor_y = self.gab
@@ -349,6 +358,8 @@ class TableRoom(Room):
 							self.memo = task[3]
 							break
 						self.gab = self.gab+1
+					self.colon_check = True
+					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
 					self.cursor_y = self.gab
@@ -371,6 +382,8 @@ class TableRoom(Room):
 							self.due = task[2]
 							break
 						self.gab = self.gab + 1
+					self.colon_check = True
+					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
 					self.cursor_y = self.gab
@@ -406,6 +419,7 @@ class TableRoom(Room):
 				self.what = ""
 				self.due = ""
 				self.memo = ""
+				self.colon_check = False
 			self.add_task_on = False
 			string = ""
 
@@ -430,6 +444,7 @@ class TableRoom(Room):
 				self.wmodify_task = 0
 				self.dmodify_task = 0
 				self.mmodify_task = 0
+				self.colon_check = False
 			self.modify_task_on = False
 			string = ""
 
@@ -460,11 +475,12 @@ class TableRoom(Room):
 		stdscr.addstr(0,2,"Directory")
 		stdscr.addstr(0,23,"Tasks")
 		stdscr.addstr(16,23,"Memo")
+		#stdscr.addstr(12,24,"test")
 		if self.ERROR == True:
 			if self.ERRORWORD == True:
-				stdscr.addstr(29, 0, ": Not an word command ", curses.color_pair(2))
+				stdscr.addstr(self.height-1, 0, ": Not an word command ", curses.color_pair(2))
 			else:
-				stdscr.addstr(29, 0, ": Not an editor command ", curses.color_pair(2))
+				stdscr.addstr(self.height-1, 0, ": Not an editor command ", curses.color_pair(2))
 
 		table_pos_y = 1
 		for table_name in self.table_list:
@@ -597,7 +613,7 @@ class TableRoom(Room):
 					return tmp
 
 			elif self.key == 8 or self.key == 127:
-				if len(self.string) > 0:
+				if len(self.string) > 2:
 					self.cursor_x = self.cursor_x - 1
 					self.string = self.string[:-1]
 			elif 32 <= self.key <= 126:
@@ -606,7 +622,7 @@ class TableRoom(Room):
 		return ""
 
 	def get_command(self):
-		if self.key == ord(':') and not self.command_check:
+		if self.key == ord(':') and not self.command_check and not self.colon_check:
 			self.command = ":"
 			self.command_check = True
 			self.cursor_x = self.cursor_x + 1
