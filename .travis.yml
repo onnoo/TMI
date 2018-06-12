@@ -6,4 +6,4 @@ install:
   - pip install tmi
 
 script:
-  - tmi/tmi.py
+  - tmi
