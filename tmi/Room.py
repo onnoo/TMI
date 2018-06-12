@@ -1,10 +1,5 @@
 import curses
 from curses.textpad import Textbox, rectangle
-import sqlite3
-from pathlib import Path
-
-VERSION = "0.5.605"
-AUTHOR = "NoStress team (2018 HU-OSS B-6)"
 
 class Room:
 	def __init__(self, stdscr, roomManager):
