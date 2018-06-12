@@ -6,14 +6,8 @@ os:
   - osx
   - linux
 
-sudo: false
-
 install:
   - pip install tmi
-  - pip install --user codecov
-
-after_success:
-  - codecov
 
 script:
   - tmi
