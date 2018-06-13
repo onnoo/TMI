@@ -148,6 +148,7 @@ class TableRoom(Room):
 		self.top = 0
 		self.bottom = 0
 		self.current = 0
+		self.TABLEERROR = False
 	
 		self.add_dir = False
 		self.add_task = 0
@@ -333,7 +334,12 @@ class TableRoom(Room):
 			self.ERRORHELP = False
 
 		if self.add_dir:
-			self.db.create_table(string)
+			try:
+				self.db.create_table(string)
+			except:
+				self.ERROR = True
+				self.TABLEERROR = True
+
 			string = ""
 			self.add_dir = False
 			self.colon_check = False
@@ -415,6 +421,8 @@ class TableRoom(Room):
 		if self.ERROR == True:
 			if self.ERRORWORD == True:
 				stdscr.addstr(self.height-1, 0, ": Not an word command ", curses.color_pair(2))
+			elif self.TABLEERROR == True:
+				stdscr.addstr(self.height-1, 0, ": Wrong table command ", curses.color_pair(2))
 			else:
 				stdscr.addstr(self.height-1, 0, ": Not an editor command ", curses.color_pair(2))
 
@@ -582,6 +590,7 @@ class TableRoom(Room):
 			self.cursor_x = self.cursor_x + 1
 			self.ERROR = False
 			self.ERRORWORD = False
+			self.TABLEERROR = False
 		elif self.command_check:
 			if self.key == 10:
 				self.command_check = False
