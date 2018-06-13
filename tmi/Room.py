@@ -60,6 +60,7 @@ class TitleRoom(Room):
 		"TMI is open source and freely distributable",
 		"",
 		"type    :q<Enter>             to exit      ",
+		"	",
 		"type    :help<Enter>          to help      ",
 		"type    :ls<Enter>            to list table"
 		]
@@ -202,7 +203,7 @@ class TableRoom(Room):
 		if execute == 'q':
 			self.ERRORHELP = False
 			self.rm.set_room("DefaultRoom")
-		elif execute == 'add -d':
+		elif execute == 'add-d':
 			if self.string_check == False:
 				self.isdir = True
 				self.colon_check = True
@@ -652,55 +653,101 @@ class HelpRoom(Room):
 		super(HelpRoom, self).__init__(stdscr, roomManager)
 		self.name = "HelpRoom"
 		self.help = [
-							"User Manuals",
-							"\n",
-							"\n",
-							"Name",
-							"	tmi - task manage interface.",
-							"	",
-							"How to use",
-							"	tmi [:add] add task(due, memo)",
-							"	tmi [:check] update finished to 1",
-							"	",
-							"Explain",
-							"	TMI is a TUI program using curses package. You can save tasks for", 
-							"	each directory and you can write notes on each task.",
-							"	",
-							"Options",
-							"	 [:add -d] add directory",
-							"	",
-							"Author",
-							"     No stress team (2018 HU-OSS B-6)",
+						"User Manuals",
+						"	",
+						"	",
+						"Name",
+						"	tmi - task manage interface.",
+						"	",
+						"How to use",
+						"	[:add] add task(due, memo)",
+						"	[:check] update finished to 1",
+						"	[:mod] modify task",
+						"	",
+						"Explain",
+						"	TMI is a TUI program using curses package. You can save tasks for", 
+						"	each directory and you can write notes on each task.",
+						"	",
+						"Options",
+						"	[:add-d] add directory",
+						"	[:mod-w] modify what",
+						"	[:mod-d] modify due",
+						"	[:mod-m] modify memo",
+						"	",
+						"Author",
+						"	No stress team (2018 HU-OSS B-6)",
 					]
+		self.UP = -1
+		self.DOWN = 1
+		self.max_lines = curses.LINES - 1
+		self.top = 0
+		self.bottom = len(self.help)
+		self.current = 0
 		self.k = 0
+
 
 	def logic(self):
 		execute = self.get_command()
 
 		if execute == 'q':
+			self.ERRORHELP = False
 			self.rm.set_room("DefaultRoom")
+		elif self.ERROR == False and self.ERRORHELP == True:
+			self.ERROR = True
+			self.ERRORHELP = False
+
+		if self.key == curses.KEY_UP:
+			curses.curs_set(0)
+			self.scroll(self.UP)
+		elif self.key == curses.KEY_DOWN:
+			curses.curs_set(0)
+			self.scroll(self.DOWN)
+		
 
 	def render(self):
 		self.stdscr.clear()
 
-		line = 0
-		for text in self.help:
-			if line == 0:
-				self.stdscr.attron(curses.A_BOLD)
-				self.stdscr.addstr(line + 2, round(self.width/2 - len(self.help[0])/2), text)
-				line = line + 1
-				continue
+		if self.ERROR == True:
+			curses.curs_set(0)
+			self.stdscr.addstr(self.height-1, 0, ": Not an editor command ", curses.color_pair(2))
+	
+		for idx, line in enumerate(self.help[self.top:self.top + self.max_lines]):
+		# Highlight the current cursor line
+			if idx == self.current:
+				self.stdscr.addstr(idx, 0, line, curses.color_pair(1))
 			else:
-				self.stdscr.attroff(curses.A_BOLD)
-			
-			self.stdscr.addstr(line + 3, 0, text)
-
-			line = line + 1
+				self.stdscr.addstr(idx, 0, line)
 
 		self.stdscr.addstr(self.cursor_y, 0, self.command)
 
 		self.stdscr.refresh()
 
+
 	def get_key(self):
 		if self.rm.ready != 0:
 			self.key = self.stdscr.getch()
+
+	def scroll(self, direction):
+        # next cursor position after scrolling
+		next_line = self.current + direction
+
+        # Up direction scroll overflow
+        # current cursor position is 0, but top position is greater than 0
+		if (direction == self.UP) and (self.top > 0 and self.current == 0):
+			self.top += direction
+			return
+		# Down direction scroll overflow
+        # next cursor position touch the max lines, but absolute position of max lines could not touch the bottom
+		if (direction == self.DOWN) and (next_line == self.max_lines) and (self.top + self.max_lines < self.bottom):
+			self.top += direction
+			return
+        # Scroll up
+        # current cursor position or top position is greater than 0
+		if (direction == self.UP) and (self.top > 0 or self.current > 0):
+			self.current = next_line
+			return
+        # Scroll down
+        # next cursor position is above max lines, and absolute position of next cursor could not touch the bottom
+		if (direction == self.DOWN) and (next_line < self.max_lines) and (self.top + next_line < self.bottom):
+			self.current = next_line
+			return
