@@ -578,7 +578,7 @@ class TableRoom(Room):
 					self.cursor_x = self.cursor_x - 1
 					self.string = self.string[:-1]
 			elif 32 <= self.key <= 126:
-				if(len(self.string) < 10 and self.add_task == 0) or (len(self.string) < 20 and (self.add_task == 1 or self.modify_task == 1)) or (len(self.string) < 10 and (self.add_task == 2 or self.modify_task == 2)) or (self.add_task == 3 or self.modify_task == 3):
+				if(len(self.string) < 15 and self.add_task == 0) or (len(self.string) < 25 and (self.add_task == 1 or self.modify_task == 1)) or (len(self.string) < 10 and (self.add_task == 2 or self.modify_task == 2)) or (self.add_task == 3 or self.modify_task == 3):
 					self.string = self.string + chr(self.key)
 					self.cursor_x = self.cursor_x + 1
 		return ""
