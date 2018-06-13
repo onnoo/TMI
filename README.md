@@ -1,3 +1,9 @@
+[![Build Status](https://travis-ci.org/onnoo/TMI.svg?branch=master)](https://travis-ci.org/onnoo/TMI)
+[![codecov](https://codecov.io/gh/onnoo/TMI/branch/master/graph/badge.svg)](https://codecov.io/gh/onnoo/TMI)
+
+
+
+
 ## What is TMI? ##
 TMI(Task Manage Interface) is open source console software for managing user's
 tasks.  It provides some method and text-based user interface.  This software is

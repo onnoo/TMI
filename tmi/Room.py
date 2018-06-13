@@ -727,33 +727,6 @@ class HelpRoom(Room):
 		if self.rm.ready != 0:
 			self.key = self.stdscr.getch()
 
-	# def get_command(self):
-	# 	if self.key == ord(':') and not self.command_check:
-	# 		curses.curs_set(1)
-	# 		self.ERROR = False
-	# 		self.command = ":"
-	# 		self.command_check = True
-	# 		self.cursor_x = self.cursor_x + 1
-	# 	elif self.command_check:
-	# 		if self.key == 10:
-	# 			self.command_check = False
-	# 			self.cursor_x = 0
-	# 			tmp = self.command[1:]
-	# 			self.command = ""
-	# 			self.ERRORHELP = True
-	# 			return tmp
-	# 		elif self.key == 8 or self.key == 127:
-	# 			if len(self.command) == 1:
-	# 				self.command_check = False
-	# 				self.cursor_x = 0
-	# 				self.command = ""
-	# 			else:
-	# 				self.command = self.command[:-1]
-	# 				self.cursor_x = self.cursor_x - 1
-	# 		elif 32 <= self.key <= 126:
-	# 			self.command = self.command + chr(self.key)
-	# 			self.cursor_x = self.cursor_x + 1
-
 	def scroll(self, direction):
         # next cursor position after scrolling
 		next_line = self.current + direction

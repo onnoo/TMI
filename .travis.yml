@@ -1,0 +1,20 @@
+language: python
+python:
+  - "3.6" 
+
+matrix:
+    include:
+        - os: linux
+          sudo: required
+          python: 3.6
+          env: TOXENV=py36
+        - os: linux
+          sudo: required
+          python: 3.6
+          env: TOXENV=py35
+
+install:
+  - pip install tmi
+
+script:
+  - tmi --version
