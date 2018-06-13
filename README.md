@@ -28,7 +28,7 @@ pip install tmi
 First, clone TMI using `git`:
 
 ```sh
-git clone https://github.com/onnoo/hu-oss-sw-2018-B-6.git
+git clone https://github.com/onnoo/TMI.git
 ```
 
  Then, `cd` to the TMI folder and run the install command:
@@ -38,4 +38,4 @@ sudo python setup.py install
 ```
 
 ## License ##
-Code released under the [MIT License](https://github.com/onnoo/hu-oss-sw-2018-B-6/raw/master/LICENSE).
+Code released under the [MIT License](https://github.com/onnoo/TMI/raw/master/LICENSE).

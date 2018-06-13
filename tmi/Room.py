@@ -1,9 +1,7 @@
 import curses
 from curses.textpad import Textbox, rectangle
-from db import DB
 
 class Room:
-		
 	def __init__(self, stdscr, roomManager):
 		self.stdscr = stdscr
 		self.height, self.width = stdscr.getmaxyx()
@@ -62,6 +60,7 @@ class TitleRoom(Room):
 		"TMI is open source and freely distributable",
 		"",
 		"type    :q<Enter>             to exit      ",
+		"	",
 		"type    :help<Enter>          to help      ",
 		"type    :ls<Enter>            to list table"
 		]
@@ -122,10 +121,11 @@ class TableRoom(Room):
 		self.dir_cursor = 1
 		self.task_cursor = 1
 		self.table_list = self.db.get_table_list()
-		if len(self.table_list) != 0:
+		if self.table_list != None and len(self.table_list) != 0:
 			self.current_table = self.table_list[self.dir_cursor-1]
 			self.task_list = self.db.get_task_list(self.current_table)
 		else:
+			self.table_list = []
 			self.current_table = 0
 			self.task_list = []
 				
@@ -144,7 +144,13 @@ class TableRoom(Room):
 		self.ERRORHELP = False
 		self.ERRORWORD = False
 		self.colon_check = False
-				
+		self.isdir = False
+		self.length = 13
+		self.top = 0
+		self.bottom = 0
+		self.current = 0
+		self.TABLEERROR = False
+	
 		self.add_dir = False
 		self.add_task = 0
 		self.add_task_on = False
@@ -162,13 +168,29 @@ class TableRoom(Room):
 		if self.key == curses.KEY_DOWN:
 			if not in_table and self.dir_cursor < len(self.table_list):
 				self.dir_cursor = self.dir_cursor + 1
-			elif in_table and self.task_cursor < len(self.task_list):
-				self.task_cursor = self.task_cursor + 1
+			elif in_table and (self.top + self.task_cursor) < len(self.task_list):
+				if self.top == 0 and self.task_cursor < self.length:
+					self.bottom = self.bottom + 1
+					self.task_cursor = self.task_cursor + 1
+				elif self.top == 0 and self.task_cursor == self.length:
+					self.top = 1
+				elif self.top > 0 and self.task_cursor == self.length:
+					self.top = self.top + 1
+				elif self.top > 0 and self.task_cursor < self.length:
+					self.task_cursor = self.task_cursor + 1
+
+				
 		elif self.key == curses.KEY_UP:
 			if not in_table and self.dir_cursor > 1:
 				self.dir_cursor = self.dir_cursor - 1
-			elif in_table and self.task_cursor > 1:
-				self.task_cursor = self.task_cursor - 1
+			elif in_table and self.task_cursor > 0:
+				if self.top == 0 and self.task_cursor < 10 and self.task_cursor > 1:
+					self.task_cursor = self.task_cursor - 1
+				elif self.top > 0 and self.task_cursor == 1:
+					self.top = self.top - 1
+				elif self.top > 0 and self.task_cursor > 1:
+					self.task_cursor = self.task_cursor - 1
+
 		elif self.key == curses.KEY_RIGHT:
 			if not in_table:
 				self.in_table = True
@@ -181,8 +203,9 @@ class TableRoom(Room):
 		if execute == 'q':
 			self.ERRORHELP = False
 			self.rm.set_room("DefaultRoom")
-		elif execute == 'add -d':
+		elif execute == 'add-d':
 			if self.string_check == False:
+				self.isdir = True
 				self.colon_check = True
 				self.ERRORHELP = False
 				self.string_check = True
@@ -196,6 +219,8 @@ class TableRoom(Room):
 				self.string_check = True
 				self.add_task = 1
 				self.cursor_y = 1+len(self.task_list)
+				if self.cursor_y > self.length + 1:
+					self.cursor_y = self.length + 1
 				self.cursor_x = 24
 				self.string_x = 22
 				self.string = "+ "
@@ -203,6 +228,7 @@ class TableRoom(Room):
 			self.target = execute[6:]
 			if self.target in self.db.get_task_name_list(self.current_table):
 				self.db.mod_task(self.current_table, self.target , 'finished', 1)
+				self.ERRORHELP = False
 			elif self.ERROR == False and self.ERRORHELP == True:
 					self.ERROR = True
 					self.ERRORHELP = False
@@ -222,7 +248,7 @@ class TableRoom(Room):
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
-					self.cursor_y = self.gab
+					self.cursor_y = self.gab - self.top
 					self.cursor_x = 24
 					self.string_x = 22
 					self.string = "+ "
@@ -246,7 +272,7 @@ class TableRoom(Room):
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
-					self.cursor_y = self.gab
+					self.cursor_y = self.gab - self.top
 					self.cursor_x = 24
 					self.string_x = 22
 					self.string = "+ "
@@ -271,7 +297,7 @@ class TableRoom(Room):
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
-					self.cursor_y = self.gab
+					self.cursor_y = self.gab - self.top
 					self.cursor_x = 24
 					self.string_x = 22
 					self.dmodify_task = 1
@@ -295,7 +321,7 @@ class TableRoom(Room):
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
-					self.cursor_y = self.gab
+					self.cursor_y = self.gab - self.top
 					self.cursor_x = 24
 					self.string_x = 22
 					self.mmodify_task = 1
@@ -309,9 +335,16 @@ class TableRoom(Room):
 			self.ERRORHELP = False
 
 		if self.add_dir:
-			self.db.create_table(string)
+			try:
+				self.db.create_table(string)
+			except:
+				self.ERROR = True
+				self.TABLEERROR = True
+
 			string = ""
 			self.add_dir = False
+			self.colon_check = False
+			self.isdir = False
 
 		if self.add_task == 3 or self.modify_task == 3:
 			if self.wmodify_task == 0 and self.dmodify_task == 0:
@@ -358,10 +391,11 @@ class TableRoom(Room):
 			string = ""
 
 		self.table_list = self.db.get_table_list()
-		if len(self.table_list) != 0:
+		if self.table_list != None and len(self.table_list) != 0:
 			self.current_table = self.table_list[self.dir_cursor-1]
 			self.task_list = self.db.get_task_list(self.current_table)
 		else:
+			self.table_list = []
 			self.current_table = 0
 			self.task_list = []
 
@@ -388,6 +422,8 @@ class TableRoom(Room):
 		if self.ERROR == True:
 			if self.ERRORWORD == True:
 				stdscr.addstr(self.height-1, 0, ": Not an word command ", curses.color_pair(2))
+			elif self.TABLEERROR == True:
+				stdscr.addstr(self.height-1, 0, ": Wrong table command ", curses.color_pair(2))
 			else:
 				stdscr.addstr(self.height-1, 0, ": Not an editor command ", curses.color_pair(2))
 
@@ -403,9 +439,18 @@ class TableRoom(Room):
 			table_pos_y = table_pos_y + 1
 
 		task_pos_y = 1
+		start = 0
+		cur = self.top
+		end = self.top + self.length
 		for task in self.task_list:
 			if task[4] == 1:
 				continue
+			if start != self.top:
+				start = start + 1
+				continue
+			if cur == self.length + self.top:
+				continue
+			cur = cur + 1
 			s = ""
 			s = s + str("~ ") + str(task[1]) + " "*(43 - len(task[1]))
 			s = s + task[2]
@@ -420,6 +465,7 @@ class TableRoom(Room):
 			else:
 				stdscr.addstr(task_pos_y, 22, s)
 			task_pos_y = task_pos_y + 1
+			#bottom = bottom + 1
 
 
 		if self.string_check or self.modify_check:
@@ -437,12 +483,16 @@ class TableRoom(Room):
 			for i in range(5):
 				stdscr.addstr(17+i, 22, " "*(width-2-22))
 			if self.add_task > 0:
-				self.stdscr.addstr(1+len(self.task_list), 22, "+ " + self.what)
-				self.stdscr.addstr(1+len(self.task_list), 67, self.due)
+				if len(self.task_list) >= self.length:
+					self.stdscr.addstr(self.length + 1, 22, "+ " + self.what)
+					self.stdscr.addstr(self.length + 1, 67, self.due)
+				else:
+					self.stdscr.addstr(1+len(self.task_list), 22, "+ " + self.what)
+					self.stdscr.addstr(1+len(self.task_list), 67, self.due)
 				self.stdscr.addstr(18, 22, self.memo)
 			elif self.modify_task > 0:
-				self.stdscr.addstr(self.gab, 22, "+ " + self.what)
-				self.stdscr.addstr(self.gab, 67, self.due)
+				self.stdscr.addstr(self.gab - self.top, 22, "+ " + self.what)
+				self.stdscr.addstr(self.gab - self.top, 67, self.due)
 				self.stdscr.addstr(18, 22, self.memo)
 
 		stdscr.move(self.cursor_y, self.cursor_x)
@@ -525,9 +575,13 @@ class TableRoom(Room):
 				if len(self.string) > 2:
 					self.cursor_x = self.cursor_x - 1
 					self.string = self.string[:-1]
+				elif len(self.string) > 0 and self.isdir == True:
+					self.cursor_x = self.cursor_x - 1
+					self.string = self.string[:-1]
 			elif 32 <= self.key <= 126:
-				self.string = self.string + chr(self.key)
-				self.cursor_x = self.cursor_x + 1
+				if(len(self.string) < 15 and self.add_task == 0) or (len(self.string) < 25 and (self.add_task == 1 or self.modify_task == 1)) or (len(self.string) < 10 and (self.add_task == 2 or self.modify_task == 2)) or (self.add_task == 3 or self.modify_task == 3):
+					self.string = self.string + chr(self.key)
+					self.cursor_x = self.cursor_x + 1
 		return ""
 
 	def get_command(self):
@@ -537,6 +591,7 @@ class TableRoom(Room):
 			self.cursor_x = self.cursor_x + 1
 			self.ERROR = False
 			self.ERRORWORD = False
+			self.TABLEERROR = False
 		elif self.command_check:
 			if self.key == 10:
 				self.command_check = False
@@ -598,55 +653,128 @@ class HelpRoom(Room):
 		super(HelpRoom, self).__init__(stdscr, roomManager)
 		self.name = "HelpRoom"
 		self.help = [
-							"User Manuals",
-							"\n",
-							"\n",
-							"Name",
-							"	tmi - task manage interface.",
-							"	",
-							"How to use",
-							"	tmi [:add] add task(due, memo)",
-							"	tmi [:check] update finished to 1",
-							"	",
-							"Explain",
-							"	TMI is a TUI program using curses package. You can save tasks for", 
-							"	each directory and you can write notes on each task.",
-							"	",
-							"Options",
-							"	 [:add -d] add directory",
-							"	",
-							"Author",
-							"     No stress team (2018 HU-OSS B-6)",
+						"User Manuals",
+						"	",
+						"	",
+						"Name",
+						"	tmi - task manage interface.",
+						"	",
+						"How to use",
+						"	[:add] add task(due, memo)",
+						"	[:check] update finished to 1",
+						"	[:mod] modify task",
+						"	",
+						"Explain",
+						"	TMI is a TUI program using curses package. You can save tasks for", 
+						"	each directory and you can write notes on each task.",
+						"	",
+						"Options",
+						"	[:add-d] add directory",
+						"	[:mod-w] modify what",
+						"	[:mod-d] modify due",
+						"	[:mod-m] modify memo",
+						"	",
+						"Author",
+						"	No stress team (2018 HU-OSS B-6)",
 					]
+		self.UP = -1
+		self.DOWN = 1
+		self.max_lines = curses.LINES - 1
+		self.top = 0
+		self.bottom = len(self.help)
+		self.current = 0
 		self.k = 0
+
 
 	def logic(self):
 		execute = self.get_command()
 
 		if execute == 'q':
+			self.ERRORHELP = False
 			self.rm.set_room("DefaultRoom")
+		elif self.ERROR == False and self.ERRORHELP == True:
+			self.ERROR = True
+			self.ERRORHELP = False
+
+		if self.key == curses.KEY_UP:
+			curses.curs_set(0)
+			self.scroll(self.UP)
+		elif self.key == curses.KEY_DOWN:
+			curses.curs_set(0)
+			self.scroll(self.DOWN)
+		
 
 	def render(self):
 		self.stdscr.clear()
 
-		line = 0
-		for text in self.help:
-			if line == 0:
-				self.stdscr.attron(curses.A_BOLD)
-				self.stdscr.addstr(line + 2, round(self.width/2 - len(self.help[0])/2), text)
-				line = line + 1
-				continue
+		if self.ERROR == True:
+			curses.curs_set(0)
+			self.stdscr.addstr(self.height-1, 0, ": Not an editor command ", curses.color_pair(2))
+	
+		for idx, line in enumerate(self.help[self.top:self.top + self.max_lines]):
+		# Highlight the current cursor line
+			if idx == self.current:
+				self.stdscr.addstr(idx, 0, line, curses.color_pair(1))
 			else:
-				self.stdscr.attroff(curses.A_BOLD)
-			
-			self.stdscr.addstr(line + 3, 0, text)
-
-			line = line + 1
+				self.stdscr.addstr(idx, 0, line)
 
 		self.stdscr.addstr(self.cursor_y, 0, self.command)
 
 		self.stdscr.refresh()
 
+
 	def get_key(self):
 		if self.rm.ready != 0:
 			self.key = self.stdscr.getch()
+
+	# def get_command(self):
+	# 	if self.key == ord(':') and not self.command_check:
+	# 		curses.curs_set(1)
+	# 		self.ERROR = False
+	# 		self.command = ":"
+	# 		self.command_check = True
+	# 		self.cursor_x = self.cursor_x + 1
+	# 	elif self.command_check:
+	# 		if self.key == 10:
+	# 			self.command_check = False
+	# 			self.cursor_x = 0
+	# 			tmp = self.command[1:]
+	# 			self.command = ""
+	# 			self.ERRORHELP = True
+	# 			return tmp
+	# 		elif self.key == 8 or self.key == 127:
+	# 			if len(self.command) == 1:
+	# 				self.command_check = False
+	# 				self.cursor_x = 0
+	# 				self.command = ""
+	# 			else:
+	# 				self.command = self.command[:-1]
+	# 				self.cursor_x = self.cursor_x - 1
+	# 		elif 32 <= self.key <= 126:
+	# 			self.command = self.command + chr(self.key)
+	# 			self.cursor_x = self.cursor_x + 1
+
+	def scroll(self, direction):
+        # next cursor position after scrolling
+		next_line = self.current + direction
+
+        # Up direction scroll overflow
+        # current cursor position is 0, but top position is greater than 0
+		if (direction == self.UP) and (self.top > 0 and self.current == 0):
+			self.top += direction
+			return
+		# Down direction scroll overflow
+        # next cursor position touch the max lines, but absolute position of max lines could not touch the bottom
+		if (direction == self.DOWN) and (next_line == self.max_lines) and (self.top + self.max_lines < self.bottom):
+			self.top += direction
+			return
+        # Scroll up
+        # current cursor position or top position is greater than 0
+		if (direction == self.UP) and (self.top > 0 or self.current > 0):
+			self.current = next_line
+			return
+        # Scroll down
+        # next cursor position is above max lines, and absolute position of next cursor could not touch the bottom
+		if (direction == self.DOWN) and (next_line < self.max_lines) and (self.top + next_line < self.bottom):
+			self.current = next_line
+			return
