@@ -144,10 +144,11 @@ class TableRoom(Room):
 		self.ERRORWORD = False
 		self.colon_check = False
 		self.isdir = False
-#		self.length = 10
-#		self.top = 0
-#		self.bottom = 0
-				
+		self.length = 13
+		self.top = 0
+		self.bottom = 0
+		self.current = 0
+	
 		self.add_dir = False
 		self.add_task = 0
 		self.add_task_on = False
@@ -165,13 +166,29 @@ class TableRoom(Room):
 		if self.key == curses.KEY_DOWN:
 			if not in_table and self.dir_cursor < len(self.table_list):
 				self.dir_cursor = self.dir_cursor + 1
-			elif in_table and self.task_cursor < len(self.task_list):
-				self.task_cursor = self.task_cursor + 1
+			elif in_table and (self.top + self.task_cursor) < len(self.task_list):
+				if self.top == 0 and self.task_cursor < self.length:
+					self.bottom = self.bottom + 1
+					self.task_cursor = self.task_cursor + 1
+				elif self.top == 0 and self.task_cursor == self.length:
+					self.top = 1
+				elif self.top > 0 and self.task_cursor == self.length:
+					self.top = self.top + 1
+				elif self.top > 0 and self.task_cursor < self.length:
+					self.task_cursor = self.task_cursor + 1
+
+				
 		elif self.key == curses.KEY_UP:
 			if not in_table and self.dir_cursor > 1:
 				self.dir_cursor = self.dir_cursor - 1
-			elif in_table and self.task_cursor > 1:
-				self.task_cursor = self.task_cursor - 1
+			elif in_table and self.task_cursor > 0:
+				if self.top == 0 and self.task_cursor < 10 and self.task_cursor > 1:
+					self.task_cursor = self.task_cursor - 1
+				elif self.top > 0 and self.task_cursor == 1:
+					self.top = self.top - 1
+				elif self.top > 0 and self.task_cursor > 1:
+					self.task_cursor = self.task_cursor - 1
+
 		elif self.key == curses.KEY_RIGHT:
 			if not in_table:
 				self.in_table = True
@@ -200,6 +217,8 @@ class TableRoom(Room):
 				self.string_check = True
 				self.add_task = 1
 				self.cursor_y = 1+len(self.task_list)
+				if self.cursor_y > self.length + 1:
+					self.cursor_y = self.length + 1
 				self.cursor_x = 24
 				self.string_x = 22
 				self.string = "+ "
@@ -207,6 +226,7 @@ class TableRoom(Room):
 			self.target = execute[6:]
 			if self.target in self.db.get_task_name_list(self.current_table):
 				self.db.mod_task(self.current_table, self.target , 'finished', 1)
+				self.ERRORHELP = False
 			elif self.ERROR == False and self.ERRORHELP == True:
 					self.ERROR = True
 					self.ERRORHELP = False
@@ -226,7 +246,7 @@ class TableRoom(Room):
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
-					self.cursor_y = self.gab
+					self.cursor_y = self.gab - self.top
 					self.cursor_x = 24
 					self.string_x = 22
 					self.string = "+ "
@@ -250,7 +270,7 @@ class TableRoom(Room):
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
-					self.cursor_y = self.gab
+					self.cursor_y = self.gab - self.top
 					self.cursor_x = 24
 					self.string_x = 22
 					self.string = "+ "
@@ -275,7 +295,7 @@ class TableRoom(Room):
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
-					self.cursor_y = self.gab
+					self.cursor_y = self.gab - self.top
 					self.cursor_x = 24
 					self.string_x = 22
 					self.dmodify_task = 1
@@ -299,7 +319,7 @@ class TableRoom(Room):
 					self.ERRORHELP = False
 					self.modify_check = True
 					self.modify_task = 1
-					self.cursor_y = self.gab
+					self.cursor_y = self.gab - self.top
 					self.cursor_x = 24
 					self.string_x = 22
 					self.mmodify_task = 1
@@ -410,9 +430,18 @@ class TableRoom(Room):
 			table_pos_y = table_pos_y + 1
 
 		task_pos_y = 1
+		start = 0
+		cur = self.top
+		end = self.top + self.length
 		for task in self.task_list:
 			if task[4] == 1:
 				continue
+			if start != self.top:
+				start = start + 1
+				continue
+			if cur == self.length + self.top:
+				continue
+			cur = cur + 1
 			s = ""
 			s = s + str("~ ") + str(task[1]) + " "*(43 - len(task[1]))
 			s = s + task[2]
@@ -445,12 +474,16 @@ class TableRoom(Room):
 			for i in range(5):
 				stdscr.addstr(17+i, 22, " "*(width-2-22))
 			if self.add_task > 0:
-				self.stdscr.addstr(1+len(self.task_list), 22, "+ " + self.what)
-				self.stdscr.addstr(1+len(self.task_list), 67, self.due)
+				if len(self.task_list) >= self.length:
+					self.stdscr.addstr(self.length + 1, 22, "+ " + self.what)
+					self.stdscr.addstr(self.length + 1, 67, self.due)
+				else:
+					self.stdscr.addstr(1+len(self.task_list), 22, "+ " + self.what)
+					self.stdscr.addstr(1+len(self.task_list), 67, self.due)
 				self.stdscr.addstr(18, 22, self.memo)
 			elif self.modify_task > 0:
-				self.stdscr.addstr(self.gab, 22, "+ " + self.what)
-				self.stdscr.addstr(self.gab, 67, self.due)
+				self.stdscr.addstr(self.gab - self.top, 22, "+ " + self.what)
+				self.stdscr.addstr(self.gab - self.top, 67, self.due)
 				self.stdscr.addstr(18, 22, self.memo)
 
 		stdscr.move(self.cursor_y, self.cursor_x)
