@@ -60,7 +60,6 @@ class TitleRoom(Room):
 		"TMI is open source and freely distributable",
 		"",
 		"type    :q<Enter>             to exit      ",
-		"	",
 		"type    :help<Enter>          to help      ",
 		"type    :ls<Enter>            to list table"
 		]
@@ -665,8 +664,9 @@ class HelpRoom(Room):
 						"	[:mod] modify task",
 						"	",
 						"Explain",
-						"	TMI is a TUI program using curses package. You can save tasks for", 
-						"	each directory and you can write notes on each task.",
+						"	TMI(Task Manage Interface) is open source console software for managing",
+						"	user's tasks.  It provides some method and text-based user interface.",
+						"	This software is developed for the various Linux OS and by python.",
 						"	",
 						"Options",
 						"	[:add-d] add directory",
@@ -676,6 +676,10 @@ class HelpRoom(Room):
 						"	",
 						"Author",
 						"	No stress team (2018 HU-OSS B-6)",
+						"	",						
+						"LICENSE",
+						"	Code released under the [MIT License]",
+						"	(https://github.com/onnoo/TMI/raw/master/LICENSE)."
 					]
 		self.UP = -1
 		self.DOWN = 1

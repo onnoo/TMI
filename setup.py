@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name             = 'tmi',
-    version          = '0.6.618',
+    version          = '0.6.620',
     description      = "NoStress team (2018 HU-OSS B-6)'s Open Source CLI Todo List",
     author           = 'onnoo',
     author_email     = 'sweyjw@gmail.com',
@@ -12,6 +12,8 @@ setup(
     packages         = find_packages(exclude = [ ]),
     keywords         = ['tmi', 'todo list', 'todo cli'],
     python_requires  = '>=3',
+    long_description = open('README.md').read(),
+    long_description_content_type='text/markdown',
     package_data     =  {'tmi' : [ "LICENSE" ]},
     zip_safe=False,
     classifiers      = [
