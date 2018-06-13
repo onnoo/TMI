@@ -1,10 +1,17 @@
 import sys,os
 import curses
 import click
-from DB import DB
-from RoomManager import RoomManager
-from Room import TitleRoom, TableRoom, HelpRoom
 
+try:
+	from DB import DB
+	from RoomManager import RoomManager
+	from Room import TitleRoom, TableRoom, HelpRoom
+except:
+	from .DB import DB
+	from .RoomManager import RoomManager
+	from .Room import TitleRoom, TableRoom, HelpRoom
+
+	
 VERSION = "0.6.618"
 AUTHOR = "NoStress team (2018 HU-OSS B-6)"
 
