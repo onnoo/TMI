@@ -11,8 +11,7 @@ except:
 	from .RoomManager import RoomManager
 	from .Room import TitleRoom, TableRoom, HelpRoom
 
-	
-VERSION = "0.6.618"
+VERSION = "0.6.620"
 AUTHOR = "NoStress team (2018 HU-OSS B-6)"
 
 # Command Line
