@@ -102,7 +102,7 @@ class TitleRoom(Room):
 
 			self.stdscr.addstr(self.cursor_y, 0, self.command)
 
-			self.stdscr.refresh()
+			# self.stdscr.refresh()
 
 	def get_key(self):
 		if self.rm.ready != 0:
@@ -164,39 +164,45 @@ class TableRoom(Room):
 		string = self.get_string(self.cursor_y, self.cursor_x)
 		stdscr = self.stdscr
 		
-		if self.key == curses.KEY_DOWN:
-			if not in_table and self.dir_cursor < len(self.table_list):
-				self.dir_cursor = self.dir_cursor + 1
-			elif in_table and (self.top + self.task_cursor) < len(self.task_list):
-				if self.top == 0 and self.task_cursor < self.length:
-					self.bottom = self.bottom + 1
-					self.task_cursor = self.task_cursor + 1
-				elif self.top == 0 and self.task_cursor == self.length:
-					self.top = 1
-				elif self.top > 0 and self.task_cursor == self.length:
-					self.top = self.top + 1
-				elif self.top > 0 and self.task_cursor < self.length:
-					self.task_cursor = self.task_cursor + 1
+		if not self.string_check and not self.command_check:
+			if self.key == curses.KEY_DOWN:
+				if not in_table and self.dir_cursor < len(self.table_list):
+					self.dir_cursor = self.dir_cursor + 1
+					self.task_cursor = 1
+					self.top = 0
+				elif in_table and (self.top + self.task_cursor) < len(self.task_list):
+					if self.top == 0 and self.task_cursor < self.length:
+						self.bottom = self.bottom + 1
+						self.task_cursor = self.task_cursor + 1
+					elif self.top == 0 and self.task_cursor == self.length:
+						self.top = 1
+					elif self.top > 0 and self.task_cursor == self.length:
+						self.top = self.top + 1
+					elif self.top > 0 and self.task_cursor < self.length:
+						self.task_cursor = self.task_cursor + 1
 
-				
-		elif self.key == curses.KEY_UP:
-			if not in_table and self.dir_cursor > 1:
-				self.dir_cursor = self.dir_cursor - 1
-			elif in_table and self.task_cursor > 0:
-				if self.top == 0 and self.task_cursor < 10 and self.task_cursor > 1:
-					self.task_cursor = self.task_cursor - 1
-				elif self.top > 0 and self.task_cursor == 1:
-					self.top = self.top - 1
-				elif self.top > 0 and self.task_cursor > 1:
-					self.task_cursor = self.task_cursor - 1
+					
+			elif self.key == curses.KEY_UP:
+				if not in_table and self.dir_cursor > 1:
+					self.dir_cursor = self.dir_cursor - 1
+					self.task_cursor = 1
+					self.top = 0
+				elif in_table and self.task_cursor > 0:
+					if self.top == 0 and self.task_cursor < 10 and self.task_cursor > 1:
+						self.task_cursor = self.task_cursor - 1
+					elif self.top > 0 and self.task_cursor == 1:
+						self.top = self.top - 1
+					elif self.top > 0 and self.task_cursor > 1:
+						self.task_cursor = self.task_cursor - 1
 
-		elif self.key == curses.KEY_RIGHT:
-			if not in_table:
-				self.in_table = True
-				self.task_cursor = 1
-		elif self.key == curses.KEY_LEFT:
-			if in_table:
-				self.in_table = False
+			elif self.key == curses.KEY_RIGHT and len(self.task_list) > 0:
+				if not in_table:
+					self.in_table = True
+					self.task_cursor = 1
+					self.top = 0
+			elif self.key == curses.KEY_LEFT:
+				if in_table:
+					self.in_table = False
 
 
 		if execute == 'q':
@@ -227,6 +233,7 @@ class TableRoom(Room):
 			self.target = execute[6:]
 			if self.target in self.db.get_task_name_list(self.current_table):
 				self.db.mod_task(self.current_table, self.target , 'finished', 1)
+				self.in_table = False
 				self.ERRORHELP = False
 			elif self.ERROR == False and self.ERRORHELP == True:
 					self.ERROR = True
@@ -361,6 +368,10 @@ class TableRoom(Room):
 				self.due = ""
 				self.memo = ""
 				self.colon_check = False
+				self.task_cursor = len(self.task_list) + 1
+				if self.task_cursor > self.length:
+					self.top = len(self.task_list) - self.length + 1
+					self.task_cursor = self.length
 			self.add_task_on = False
 			string = ""
 
@@ -386,6 +397,7 @@ class TableRoom(Room):
 				self.dmodify_task = 0
 				self.mmodify_task = 0
 				self.colon_check = False
+				self.in_table = False
 			self.modify_task_on = False
 			string = ""
 
@@ -724,7 +736,7 @@ class HelpRoom(Room):
 
 		self.stdscr.addstr(self.cursor_y, 0, self.command)
 
-		self.stdscr.refresh()
+		# self.stdscr.refresh()
 
 
 	def get_key(self):
