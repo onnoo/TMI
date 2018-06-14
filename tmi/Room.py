@@ -706,6 +706,7 @@ class HelpRoom(Room):
 
 
 	def logic(self):
+		self.ERROR = False
 		execute = self.get_command()
 
 		if execute == 'q':
