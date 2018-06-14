@@ -159,10 +159,12 @@ class TableRoom(Room):
 
 	def logic(self):
 		in_table = self.in_table
+		self.ERROR = False
 				
 		execute = self.get_command()
 		string = self.get_string(self.cursor_y, self.cursor_x)
 		stdscr = self.stdscr
+
 		
 		if not self.string_check and not self.command_check:
 			if self.key == curses.KEY_DOWN:
@@ -203,6 +205,7 @@ class TableRoom(Room):
 			elif self.key == curses.KEY_LEFT:
 				if in_table:
 					self.in_table = False
+
 
 
 		if execute == 'q':
