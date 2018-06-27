@@ -149,6 +149,7 @@ class TableRoom(Room):
 		self.bottom = 0
 		self.current = 0
 		self.TABLEERROR = False
+		self.EMPTYERROR = False
 	
 		self.add_dir = False
 		self.add_task = 0
@@ -221,7 +222,7 @@ class TableRoom(Room):
 				self.cursor_x = 1
 				self.string_x = 1
 		elif execute == 'add':
-			if self.string_check == False:
+			if self.table_list != [] and self.string_check == False:
 				self.colon_check = True
 				self.ERRORHELP = False
 				self.string_check = True
@@ -232,6 +233,11 @@ class TableRoom(Room):
 				self.cursor_x = 24
 				self.string_x = 22
 				self.string = "+ "
+			elif self.ERROR == False and self.ERRORHELP == True:
+					self.ERROR = True
+					self.ERRORHELP = False
+					self.EMPTYERROR = True
+
 		elif len(execute) >= 6 and execute[:6] == "check ":
 			self.target = execute[6:]
 			if self.target in self.db.get_task_name_list(self.current_table):
@@ -438,6 +444,8 @@ class TableRoom(Room):
 				stdscr.addstr(self.height-1, 0, ": Not an word command ", curses.color_pair(2))
 			elif self.TABLEERROR == True:
 				stdscr.addstr(self.height-1, 0, ": Wrong table command ", curses.color_pair(2))
+			elif self.EMPTYERROR == True:
+				stdscr.addstr(self.height-1, 0, ": Directory does not exist ", curses.color_pair(2))
 			else:
 				stdscr.addstr(self.height-1, 0, ": Not an editor command ", curses.color_pair(2))
 
@@ -606,6 +614,7 @@ class TableRoom(Room):
 			self.ERROR = False
 			self.ERRORWORD = False
 			self.TABLEERROR = False
+			self.EMPTYERROR = False
 		elif self.command_check:
 			if self.key == 10:
 				self.command_check = False
